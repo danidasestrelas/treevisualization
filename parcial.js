@@ -93,7 +93,7 @@
 
             function leafPath(number, ps, path){//console.log(number);
               if(number>0){
-                var parent = parseInt((number)/ps);
+                var parent = parseInt((number-1)/ps);
                 path.push(number);
                   leafPath(parent, ps, path);
               }else {
