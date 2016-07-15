@@ -58,9 +58,19 @@
                     var text = d3.select("body").append("select")
                       .attr('id', "valueText")
 
+                    var optionList = [];
+                    for(var i in dataP.objectMapping)
+                    {
+                        for(var j = 0; j < dataP.objectMapping[i].length; j++){
+                            if(dataP.objectMapping[i][j] != null)
+                                dataP.objectMapping[i][j]['parent'] = i;
+                        }
+                        optionList = optionList.concat(dataP.objectMapping[i]);
+                    }
                     var options = text.selectAll('option')
-                      .data(Object.keys(dataP.objectMapping)).enter()
-                      .append('option').text(function(d){return d});
+                      .data(optionList).enter()
+                      .append('option').text(function(d){return d.objName})
+                        .attr('value',function(d){return d.parent} );
                     /*
                     var text = d3.select("body").append("input")
                         .attr("id", "valueText")
@@ -72,7 +82,7 @@
                     .attr("value", "Search Node")
                     .on("click", function(){
                         var path = [];
-                        leafPath(text.property("value"),data.partitionSize,path);
+                        leafPath(parseInt(text.property("value")),data.partitionSize,path);
                         closeTree(root, path);
                     });
 
@@ -81,10 +91,9 @@
 
             });
 
-            function leafPath(number, ps, path){
-                console.log(number);
+            function leafPath(number, ps, path){//console.log(number);
               if(number>0){
-                var parent = parseInt((number-1)/ps);
+                var parent = parseInt((number)/ps);
                 path.push(number);
                   leafPath(parent, ps, path);
               }else {
