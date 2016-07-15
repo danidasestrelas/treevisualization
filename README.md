@@ -2,6 +2,9 @@
 
 The purpose is to make a visualization of a big tree structure using d3js.
 
+## Animation [ ]
+There will be animation to add and delete objects in the tree leafs.
+
 ## Big number of children [ ]
 
 Example of a tree with partition size of 256:
