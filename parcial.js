@@ -33,7 +33,7 @@
                 } else {
                     console.log(data);
 
-                    dataP = data;
+                    //dataP = data;
                     dataset = jsonToFlare(data);
                     root = dataset[0];
                     root.x0 = height / 2;
@@ -43,41 +43,54 @@
 
                     d3.select(self.frameElement).style("height", "500px");
 
+
                     var open = [];
+                    /* For the start configuration of the tree
+                    * takes the first node of each level and let
+                    * their open
+                    * */
                     for(var i = 0; i < data.levels-1; i++){
                         open.push(pidFop(data.partitionSize, i));
                     }
                     inicialTree = open;
                     closeTree(root, open);
 
-                    var resetButton = d3.select("body").append("input")
+                    /* reset button using the open list configuration
+                    * */
+                    d3.select("body").append("input")
                     .attr("type", "button")
                     .attr("value", "Reset Tree")
                     .on("click", function(){closeTree(root, open)});
 
+                    /* Create the select list for the objects names
+                    * */
                     var text = d3.select("body").append("select")
                       .attr('id', "valueText")
 
+                    /* add to the objects from the objectsMapping
+                    * a link to their father in order to find the path
+                    * for then later when the user selects an object
+                    * */
                     var optionList = [];
-                    for(var i in dataP.objectMapping)
+                    for(var i in data.objectMapping)
                     {
-                        for(var j = 0; j < dataP.objectMapping[i].length; j++){
-                            if(dataP.objectMapping[i][j] != null)
-                                dataP.objectMapping[i][j]['parent'] = i;
+                        for(var j = 0; j < data.objectMapping[i].length; j++){
+                            if(data.objectMapping[i][j] != null)
+                                data.objectMapping[i][j]['parent'] = i;
                         }
-                        optionList = optionList.concat(dataP.objectMapping[i]);
+                        optionList = optionList.concat(data.objectMapping[i]);
                     }
-                    var options = text.selectAll('option')
+                    /* The value of an <option> is the parent number
+                    * */
+                    text.selectAll('option')
                       .data(optionList).enter()
                       .append('option').text(function(d){return d.objName})
-                        .attr('value',function(d){return d.parent} );
-                    /*
-                    var text = d3.select("body").append("input")
-                        .attr("id", "valueText")
-                    .attr("type", "text")
-                    .attr("value", "");*/
+                      .attr('value',function(d){return d.parent} );
 
-                     var searchButton = d3.select("body").append("input")
+                    /* By clicking the search button it calls the leafPath function
+                    *  with the value of the option selected
+                    * */
+                    d3.select("body").append("input")
                     .attr("type", "button")
                     .attr("value", "Search Node")
                     .on("click", function(){
@@ -91,7 +104,11 @@
 
             });
 
-            function leafPath(number, ps, path){//console.log(number);
+            function leafPath(number, ps, path){
+                /* By a number/key node name, finds all the path
+                *  from the root to this current number
+                *  returning it in a list
+                * */
               if(number>0){
                 var parent = parseInt((number-1)/ps);
                 path.push(number);
@@ -101,6 +118,10 @@
               }
             }
             function closeTree(source, openNodes){
+                /* Uses the click function to let just the nodes
+                *  in the array openNodes open in the tree. the remain
+                *  do not show its children
+                * */
               var nodes = tree.nodes(source).reverse();
 
                 nodes.forEach(function(d) {
@@ -117,11 +138,11 @@
             function update(source) {
 
               // Compute the new tree layout.
-              var nodes = tree.nodes(root).reverse(),
+              var nodes = tree.nodes(root).reverse(),  // list of the nodes objects, descending
                   links = tree.links(nodes);
 
               // Normalize for fixed-depth.
-              nodes.forEach(function(d) { d.y = d.depth * 100; }); //Distancia entre nodos --> comprimento arestas
+              nodes.forEach(function(d) { d.y = d.depth * 100; }); // the distance between nodes
 
               // Update the nodes…
               var node = svg.selectAll("g.node")
@@ -133,6 +154,7 @@
                   .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
                   .on("click", click);
 
+                // append circles and rects to the nodes
               nodeEnter.append("circle")
                   .attr("r", 1e-6)
                   .style("fill", function(d) {  return d._children ? "lightsteelblue" : "#fff"; });
@@ -153,6 +175,7 @@
                 .attr("height", "48px");*/
                 
 
+               // the label of the node
               nodeEnter.append("text")
                   .attr("x", function(d) { return d.children || d._children ? -13 : 13; })
                   .attr("dy", ".35em")
@@ -165,6 +188,7 @@
                   .duration(duration)
                   .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
 
+                // the new style after the transition
               nodeUpdate.select("circle")
                   .attr("r", function(d) {  return d.type == "object" ? 0 : 10; })
                   .style("fill", function(d) {
