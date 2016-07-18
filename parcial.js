@@ -1,5 +1,5 @@
  // Your beautiful D3 code will go here
- var jsonFile = "minitree.json";
+ var jsonFile = "tree.json";
             var dataset;
             var dataP;
             var inicialTree = [];
@@ -229,44 +229,41 @@
             }
 
 
-            function jsonToFlare(data){ // Depth
-                // the objecti is to have a structure with parents and children
-                // FROM: {"partitionSize": 4, "levels":3, "usedPartitions": [0,1,5], "objectMapping": [{}]}
-                // {name:"root", children: [{},{},{}]}                  
-                var name = pidFop(data.partitionSize, 0);
-                var children = getChildren(name, 1, data);               
-                return [{"name": name, "children": children}];
-            }
+                function jsonToFlare(data){
+                    var name = pidFop(data.partitionSize, 0);
+                    var children = getChildren(name, 1, data);
+                    return [{"name": name, "children": children}];
+                }
 
-            function getChildren(parent, level, data){
-                var first = (parent*data.partitionSize) + 1;
-                var last = (parent+1)*data.partitionSize;
+                function getChildren(parent, level, data){
+                    var first = (parent*data.partitionSize) + 1;
+                    var last = (parent+1)*data.partitionSize;
 
-                var children = [];
-                var k = 0;
+                    var children = [];
+                    var k = 0;
 
-                if(level == data.levels){
-                    var objects = data.objectMapping[parent];
-                    if(data.objectMapping[parent] != null) {
-                        for (var i = 0; i < objects.length; i++) {
-                            children[i] = {name: objects[i].objName, "children": null};
+                    if(level == data.levels){
+                        var objects = data.objectMapping[parent];
+                        if(data.objectMapping[parent] != null) {
+                            for (var i = 0; i < objects.length; i++) {
+                                children[i] = {name: objects[i].objName, "children": null};
+                            }
                         }
                     }
-                }
-                else {
+                    else {
 
-                    for (var i = first; i <= last; i++) { // for each child of this parent
-                        if (data.usedPartitions.indexOf(i) > -1) {
-                            if (level < data.levels)
-                                children[k] = {"name": i, "children": getChildren(i, level + 1, data)};
+                        for (var i = first; i <= last; i++) { // for each child of this parent
+                            if (data.usedPartitions.indexOf(i) > -1) {
+                                if (level < data.levels)
+                                    children[k] = {"name": i, "children": getChildren(i, level + 1, data)};
+                            }
+                            //else children[k] = null;
+                            k++;
                         }
-                        //else children[k] = null;
-                        k++;
                     }
+                    return children;
                 }
-                return children;
-            }
 
-            function pidFop(ps, level){
-                return (Math.pow(ps, level) - 1)/(ps-1);
-            }
+                function pidFop(ps, level){
+                    return (Math.pow(ps, level) - 1)/(ps-1);
+                }
