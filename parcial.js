@@ -1,4 +1,4 @@
- // Your beautiful D3 code will go here
+ // This file is released under the GNU General Public License, version 3
  var jsonFile = "minitree.json";
             var dataset;
             var dataP;
