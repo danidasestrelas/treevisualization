@@ -230,34 +230,44 @@
 
 
                 function jsonToFlare(data){
-                    var name = pidFop(data.partitionSize, 0);
+                    /* Start with the root of the tree that is always 0
+                    *  Then get all the other nodes recursively using getChildren
+                    * */
+                    var name = 0; //pidFop(data.partitionSize, 0);  it is always 0
                     var children = getChildren(name, 1, data);
                     return [{"name": name, "children": children}];
                 }
 
                 function getChildren(parent, level, data){
-                    var first = (parent*data.partitionSize) + 1;
-                    var last = (parent+1)*data.partitionSize;
-
                     var children = [];
                     var k = 0;
 
                     if(level == data.levels){
+                        /* Case that maps the objects keys to the leafs
+                        *  their behavior is different since their name is not related to te tree structure
+                        *  as are the non-objects-partitions nodes
+                        * */
                         var objects = data.objectMapping[parent];
-                        if(data.objectMapping[parent] != null) {
+                        if(objects != null) {
                             for (var i = 0; i < objects.length; i++) {
                                 children[i] = {name: objects[i].objName, "children": null};
                             }
                         }
                     }
                     else {
+                        /* For the actual parent node it calculates the first and last children
+                        * and see if all its interval of children are in the used partition
+                        * and add the ones that are
+                        * */
+                        var first = (parent*data.partitionSize) + 1;
+                        var last = (parent+1)*data.partitionSize;
 
                         for (var i = first; i <= last; i++) { // for each child of this parent
                             if (data.usedPartitions.indexOf(i) > -1) {
                                 if (level < data.levels)
                                     children[k] = {"name": i, "children": getChildren(i, level + 1, data)};
                             }
-                            //else children[k] = null;
+                            // if a node is not in used partitions, it is not showed
                             k++;
                         }
                     }
@@ -265,5 +275,7 @@
                 }
 
                 function pidFop(ps, level){
+                    /* Calculates the first node of a level
+                    * */
                     return (Math.pow(ps, level) - 1)/(ps-1);
                 }
