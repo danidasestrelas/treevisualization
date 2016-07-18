@@ -1,5 +1,5 @@
- // Your beautiful D3 code will go here
- var jsonFile = "tree.json";
+ // This file is released under the GNU General Public License, version 3
+ var jsonFile = "minitree.json";
             var dataset;
             var dataP;
             var inicialTree = [];
