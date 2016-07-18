@@ -137,6 +137,12 @@
                   .attr("r", 1e-6)
                   .style("fill", function(d) {  return d._children ? "lightsteelblue" : "#fff"; });
 
+                nodeEnter.append("rect")
+                    .attr("width", 0)
+                    .attr("height", 0)
+                    .style("fill", function(d) {
+                        if (d.type == "master") return "#f26363";
+                        else  return d._children ? "lightsteelblue" : "#fff"; });
 
 
                /**nodeEnter.append("svg:image")
@@ -160,13 +166,28 @@
                   .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
 
               nodeUpdate.select("circle")
-                  .attr("r", 10)
-                  .style("fill", function(d) {  return d._children ? "lightsteelblue" : "#fff"; })
-                  .style("stroke", function(d) { if (d.name == 0) 
-                      return "orange";
+                  .attr("r", function(d) {  return d.type == "object" ? 0 : 10; })
+                  .style("fill", function(d) {
+                        if (d.type == "master") return "#f4c0c0";
+                        else  return d._children ? "lightsteelblue" : "#fff"; })
+                  .style("stroke", function(d) { if (d.type == "master")
+                      return "red";
+                    else if(d.type == "object")
+                      return "gray";
                     else
                       return "steelblue";  });
 
+                nodeUpdate.select("rect")
+                    .attr("width",function(d) {  return d.type == "object" ? 10 : 0; } )
+                    .attr("height",function(d) {  return d.type == "object" ? 15 : 0; } )
+                    .style("fill", function(d) {  return d._children ? "lightsteelblue" : "#fff"; })
+                    .style("stroke", function(d) {
+                        if (d.type == "master")
+                      return "red";
+                    else if(d.type == "object")
+                      return "gray";
+                    else
+                      return "steelblue";  });
 
               nodeUpdate.select("text")
                   .style("fill-opacity", 1);
@@ -235,7 +256,7 @@
                     * */
                     var name = 0; //pidFop(data.partitionSize, 0);  it is always 0
                     var children = getChildren(name, 1, data);
-                    return [{"name": name, "children": children}];
+                    return [{"name": name, "children": children, "type": "master"}];
                 }
 
                 function getChildren(parent, level, data){
@@ -250,7 +271,7 @@
                         var objects = data.objectMapping[parent];
                         if(objects != null) {
                             for (var i = 0; i < objects.length; i++) {
-                                children[i] = {name: objects[i].objName, "children": null};
+                                children[i] = {name: objects[i].objName, "children": null, "type": "object"};
                             }
                         }
                     }
@@ -265,7 +286,7 @@
                         for (var i = first; i <= last; i++) { // for each child of this parent
                             if (data.usedPartitions.indexOf(i) > -1) {
                                 if (level < data.levels)
-                                    children[k] = {"name": i, "children": getChildren(i, level + 1, data)};
+                                    children[k] = {"name": i, "children": getChildren(i, level + 1, data), "type": "key"};
                             }
                             // if a node is not in used partitions, it is not showed
                             k++;
