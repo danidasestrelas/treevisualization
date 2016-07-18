@@ -1,4 +1,5 @@
- // This file is released under the GNU General Public License, version 3
+ /* This file is released under the GNU General Public License, version 3
+ * */
  var jsonFile = "minitree.json";
             var dataset;
             var dataP;
@@ -65,14 +66,14 @@
                     /* Create the select list for the objects names
                     * */
                     var text = d3.select("body").append("select")
-                      .attr('id', "valueText")
+                      .attr('id', "valueText");
 
                     /* add to the objects from the objectsMapping
                     * a link to their father in order to find the path
                     * for then later when the user selects an object
                     * */
                     var optionList = [];
-                    for(var i in data.objectMapping)
+                    for(i in data.objectMapping)
                     {
                         for(var j = 0; j < data.objectMapping[i].length; j++){
                             if(data.objectMapping[i][j] != null)
@@ -151,7 +152,7 @@
               // Enter any new nodes at the parent's previous position.
               var nodeEnter = node.enter().append("g")
                   .attr("class", "node")
-                  .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+                  .attr("transform", function() { return "translate(" + source.y0 + "," + source.x0 + ")"; })
                   .on("click", click);
 
                 // append circles and rects to the nodes
@@ -219,7 +220,7 @@
               // Transition exiting nodes to the parent's new position.
               var nodeExit = node.exit().transition()
                   .duration(duration)
-                  .attr("transform", function(d) { return "translate(" + source.y + "," + source.x + ")"; })
+                  .attr("transform", function() { return "translate(" + source.y + "," + source.x + ")"; })
                   .remove();
 
               nodeExit.select("circle")
@@ -235,7 +236,7 @@
               // Enter any new links at the parent's previous position.
               link.enter().insert("path", "g")
                   .attr("class", "link")
-                  .attr("d", function(d) {
+                  .attr("d", function() {
                     var o = {x: source.x0, y: source.y0};
                     return diagonal({source: o, target: o});
                   });
@@ -248,7 +249,7 @@
               // Transition exiting nodes to the parent's new position.
               link.exit().transition()
                   .duration(duration)
-                  .attr("d", function(d) {
+                  .attr("d", function() {
                     var o = {x: source.x, y: source.y};
                     return diagonal({source: o, target: o});
                   })
@@ -286,7 +287,7 @@
                 function getChildren(parent, level, data){
                     var children = [];
                     var k = 0;
-
+                    var i;
                     if(level == data.levels){
                         /* Case that maps the objects keys to the leafs
                         *  their behavior is different since their name is not related to te tree structure
@@ -294,7 +295,7 @@
                         * */
                         var objects = data.objectMapping[parent];
                         if(objects != null) {
-                            for (var i = 0; i < objects.length; i++) {
+                            for (i = 0; i < objects.length; i++) {
                                 children[i] = {name: objects[i].objName, "children": null, "type": "object"};
                             }
                         }
@@ -307,7 +308,7 @@
                         var first = (parent*data.partitionSize) + 1;
                         var last = (parent+1)*data.partitionSize;
 
-                        for (var i = first; i <= last; i++) { // for each child of this parent
+                        for (i = first; i <= last; i++) { // for each child of this parent
                             if (data.usedPartitions.indexOf(i) > -1) {
                                 if (level < data.levels)
                                     children[k] = {"name": i, "children": getChildren(i, level + 1, data), "type": "key"};
