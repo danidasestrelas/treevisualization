@@ -155,7 +155,7 @@
                   .attr("transform", function() { return "translate(" + source.y0 + "," + source.x0 + ")"; })
                   .on("click", click);
 
-                // append circles and rects to the nodes
+                // append circles and rectangles to the nodes
               nodeEnter.append("circle")
                   .attr("r", 1e-6)
                   .style("fill", function(d) {  return d._children ? "lightsteelblue" : "#fff"; });
@@ -174,7 +174,7 @@
                 .attr("y", "-24px")
                 .attr("width", "48px")
                 .attr("height", "48px");*/
-                
+
 
                // the label of the node
               nodeEnter.append("text")
@@ -298,32 +298,33 @@
                         var objects = data.objectMapping[parent];
 
                         if(objects != null) {
-                            if (objects.lentght > 5){
+
+                            if (objects.length > 5){
+
                                 /* Creates the first plus node with no siblings
                                 * show: false , because it will not appear yet
                                 * */
-                                children[0] = {name: "first", "children": null, "type": "plus", "siblings": siblings, "show": false};
+                                children[0] = {name: "up", "children": null, "type": "plus", "siblings": siblings, "show": false};
                                 /* Iterates in all children
                                 * */
-                                for (i = 1; i <= objects.length; i++) {
+                                for (i = 0; i < 5; i++) {
                                     /* Just plus nodes have siblings
                                     * */
-                                    if(i <= 5)
-                                        children[i] = {name: objects[i].objName, "children": null, "type": "object", "show": true};
-                                    else
-                                        /* Hide the children
-                                        * */
-                                        children[i] = {name: objects[i].objName, "children": null, "type": "object", "show": false};
-
+                                    children[i+1] = {name: objects[i].objName, "children": null, "type": "object", "show": true};
+                                }
+                                for(i= 5; i < objects.length; i++){
+                                    /* Hide the children
+                                     * */
+                                    siblings[i-5] = {name: objects[i].objName, "children": null, "type": "object","show": false };
                                 }
                                 /* Add the last plus
                                 * */
-                                children[i] = {name: "first", "children": null, "type": "plus", "siblings": siblings, "show": false}
+                                children[6] = {name: "down", "children": null, "type": "plus", "siblings": siblings, "show": false}
 
                                 /* Add the siblings to the plus nodes
                                 * */
-                                children[0]["siblings"] = children;
-                                children[i]["siblings"] = children;
+                                children[0]["siblings"] = siblings;
+                                children[6]["siblings"] = siblings;
                             }
                             else {
                                 for (i = 0; i < objects.length; i++) {
@@ -350,6 +351,7 @@
                         }
                     }
                     return children;
+
                 }
 
                 function pidFop(ps, level){
