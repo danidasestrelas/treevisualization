@@ -193,14 +193,15 @@
               nodeUpdate.select("circle")
                   .attr("r", function(d) {  return d.type == "object" ? 0 : 10; })
                   .style("fill", function(d) {
-                        if (d.type == "master") return "#f4c0c0";
-                        else  return d._children ? "lightsteelblue" : "#fff"; })
-                  .style("stroke", function(d) { if (d.type == "master")
-                      return "red";
-                    else if(d.type == "object")
-                      return "gray";
-                    else
-                      return "steelblue";  });
+                      if (d.type == "master") return "#f4c0c0";
+                      else  return d._children ? "lightsteelblue" : "#fff"; })
+                  .style("stroke", function(d) {
+                      if (d.type == "master")
+                          return "red";
+                        else if(d.type == "object")
+                          return "gray";
+                        else
+                          return "steelblue";  });
 
                 nodeUpdate.select("rect")
                     .attr("width",function(d) {  return d.type == "object" ? 10 : 0; } )
@@ -208,11 +209,11 @@
                     .style("fill", function(d) {  return d._children ? "lightsteelblue" : "#fff"; })
                     .style("stroke", function(d) {
                         if (d.type == "master")
-                      return "red";
-                    else if(d.type == "object")
-                      return "gray";
-                    else
-                      return "steelblue";  });
+                          return "red";
+                        else if(d.type == "object")
+                          return "gray";
+                        else
+                          return "steelblue";  });
 
               nodeUpdate.select("text")
                   .style("fill-opacity", 1);
@@ -286,6 +287,7 @@
 
                 function getChildren(parent, level, data){
                     var children = [];
+                    var siblings = [];
                     var k = 0;
                     var i;
                     if(level == data.levels){
@@ -294,9 +296,39 @@
                         *  as are the non-objects-partitions nodes
                         * */
                         var objects = data.objectMapping[parent];
+
                         if(objects != null) {
-                            for (i = 0; i < objects.length; i++) {
-                                children[i] = {name: objects[i].objName, "children": null, "type": "object"};
+                            if (objects.lentght > 5){
+                                /* Creates the first plus node with no siblings
+                                * show: false , because it will not appear yet
+                                * */
+                                children[0] = {name: "first", "children": null, "type": "plus", "siblings": siblings, "show": false};
+                                /* Iterates in all children
+                                * */
+                                for (i = 1; i <= objects.length; i++) {
+                                    /* Just plus nodes have siblings
+                                    * */
+                                    if(i <= 5)
+                                        children[i] = {name: objects[i].objName, "children": null, "type": "object", "show": true};
+                                    else
+                                        /* Hide the children
+                                        * */
+                                        children[i] = {name: objects[i].objName, "children": null, "type": "object", "show": false};
+
+                                }
+                                /* Add the last plus
+                                * */
+                                children[i] = {name: "first", "children": null, "type": "plus", "siblings": siblings, "show": false}
+
+                                /* Add the siblings to the plus nodes
+                                * */
+                                children[0]["siblings"] = children;
+                                children[i]["siblings"] = children;
+                            }
+                            else {
+                                for (i = 0; i < objects.length; i++) {
+                                    children[i] = {name: objects[i].objName, "children": null, "type": "object"};
+                                }
                             }
                         }
                     }
