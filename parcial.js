@@ -4,6 +4,7 @@
             var dataset;
             var dataP;
             var inicialTree = [];
+            var text;
 
 
             var margin = {top: 20, right: 120, bottom: 20, left: 120},
@@ -34,7 +35,7 @@
                 } else {
                     console.log(data);
 
-                    //dataP = data;
+                    dataP = data;
                     dataset = jsonToFlare(data);
                     root = dataset[0];
                     root.x0 = height / 2;
@@ -65,7 +66,7 @@
 
                     /* Create the select list for the objects names
                     * */
-                    var text = d3.select("body").append("select")
+                    text = d3.select("body").append("select")
                       .attr('id', "valueText");
 
                     /* add to the objects from the objectsMapping
@@ -86,7 +87,7 @@
                     text.selectAll('option')
                       .data(optionList).enter()
                       .append('option').text(function(d){return d.objName})
-                      .attr('value',function(d){return d.parent} );
+                      .attr('value',function(d){return d.parent+"|"+d.objName} );
 
                     /* By clicking the search button it calls the leafPath function
                     *  with the value of the option selected
@@ -96,7 +97,7 @@
                     .attr("value", "Search Node")
                     .on("click", function(){
                         var path = [];
-                        leafPath(parseInt(text.property("value")),data.partitionSize,path);
+                        leafPath(text.property("value"),data.partitionSize,path);
                         closeTree(root, path);
                     });
 
@@ -105,7 +106,34 @@
 
             });
 
-            function leafPath(number, ps, path){
+            function leafPathName(name, data, path) {
+                /* Receives the name of the object
+                * and search for it in objectMapping
+                * returning the number of the parent
+                * */
+                var parent = null;
+                for(i in data.objectMapping)
+                {
+                    for(var j = 0; j < data.objectMapping[i].length; j++){
+                        if(data.objectMapping[i][j] != null && data.objectMapping[i][j].objName == name){
+                            parent = i;
+                            break;
+                        }
+                    }
+                }
+
+                /* Founded the parent takes the path in the tree
+                * */
+                if(parent != null){
+                    leafPath(parent, data.partitionSize, path);
+                }
+
+            }
+
+            function leafPath(value, ps, path){
+                var aux = value.toString().split("|");
+                var number = parseInt(aux[0]);
+                var name = aux[1];
                 /* By a number/key node name, finds all the path
                 *  from the root to this current number
                 *  returning it in a list
@@ -118,6 +146,17 @@
                   path.push(0);
               }
             }
+
+            function highlightObj(name, path){
+                /* Go through the root structure to change
+                * the color of the object selected
+                * */
+                var i = 0;
+                path.reverse();
+
+                
+            }
+
             function closeTree(source, openNodes){
                 /* Uses the click function to let just the nodes
                 *  in the array openNodes open in the tree. the remain
@@ -136,6 +175,8 @@
                 });
             }
 
+
+
             function update(source) {
 
               // Compute the new tree layout.
@@ -153,9 +194,12 @@
               var nodeEnter = node.enter().append("g")
                   .attr("class", "node")
                   .attr("transform", function() { return "translate(" + source.y0 + "," + source.x0 + ")"; })
-                  .on("click", click);
+                  .on("click", function(d){
+                      if(d.type == "plus")
+                          return clickPlus(d);
+                      else return click(d)});
 
-                // append circles and rects to the nodes
+                // append circles and rectangles to the nodes
               nodeEnter.append("circle")
                   .attr("r", 1e-6)
                   .style("fill", function(d) {  return d._children ? "lightsteelblue" : "#fff"; });
@@ -174,7 +218,7 @@
                 .attr("y", "-24px")
                 .attr("width", "48px")
                 .attr("height", "48px");*/
-                
+
 
                // the label of the node
               nodeEnter.append("text")
@@ -193,14 +237,15 @@
               nodeUpdate.select("circle")
                   .attr("r", function(d) {  return d.type == "object" ? 0 : 10; })
                   .style("fill", function(d) {
-                        if (d.type == "master") return "#f4c0c0";
-                        else  return d._children ? "lightsteelblue" : "#fff"; })
-                  .style("stroke", function(d) { if (d.type == "master")
-                      return "red";
-                    else if(d.type == "object")
-                      return "gray";
-                    else
-                      return "steelblue";  });
+                      if (d.type == "master") return "#f4c0c0";
+                      else  return d._children ? "lightsteelblue" : "#fff"; })
+                  .style("stroke", function(d) {
+                      if (d.type == "master")
+                          return "red";
+                        else if(d.type == "object")
+                          return "gray";
+                        else
+                          return "steelblue";  });
 
                 nodeUpdate.select("rect")
                     .attr("width",function(d) {  return d.type == "object" ? 10 : 0; } )
@@ -208,11 +253,11 @@
                     .style("fill", function(d) {  return d._children ? "lightsteelblue" : "#fff"; })
                     .style("stroke", function(d) {
                         if (d.type == "master")
-                      return "red";
-                    else if(d.type == "object")
-                      return "gray";
-                    else
-                      return "steelblue";  });
+                          return "red";
+                        else if(d.type == "object")
+                          return "gray";
+                        else
+                          return "steelblue";  });
 
               nodeUpdate.select("text")
                   .style("fill-opacity", 1);
@@ -262,6 +307,20 @@
               });
             }
 
+             function clickPlus(d){
+                 /* Remove the last 5 children from the parent
+                 * */
+                 var newSiblings = d.parent.children.splice(-5,5);
+
+                 console.log(d.parent.children);
+                 console.log(d.siblings);
+
+                 var newChildren = d.siblings.splice(0,5);
+
+                 d.parent.children = d.parent.children.concat(newChildren);
+                 d.siblings = d.siblings.concat(newSiblings);
+                 update(d);
+             }
             // Toggle children on click.
             function click(d) {
               if (d.children) {
@@ -286,6 +345,7 @@
 
                 function getChildren(parent, level, data){
                     var children = [];
+                    var siblings = [];
                     var k = 0;
                     var i;
                     if(level == data.levels){
@@ -294,9 +354,40 @@
                         *  as are the non-objects-partitions nodes
                         * */
                         var objects = data.objectMapping[parent];
+
+                        /* Sort the objects by the slot number
+                        * */
+                        objects.sort(function(a,b){ return a.slot-b.slot});
+
                         if(objects != null) {
-                            for (i = 0; i < objects.length; i++) {
-                                children[i] = {name: objects[i].objName, "children": null, "type": "object"};
+
+                            if (objects.length > 5){
+
+                                /* Creates the first plus node with no siblings
+                                * show: false , because it will not appear yet
+                                * */
+                                children[0] = {name: "up", "children": null, "type": "plus", "siblings": siblings, "show": false};
+                                /* Iterates in all children
+                                * */
+                                for (i = 0; i < 5; i++) {
+                                    /* Just plus nodes have siblings
+                                    * */
+                                    children[i+1] = {name: objects[i].objName, "children": null, "type": "object", "show": true};
+                                }
+                                for(i= 5; i < objects.length; i++){
+                                    /* Hide the children
+                                     * */
+                                    siblings[i-5] = {name: objects[i].objName, "children": null, "type": "object","show": false };
+                                }
+                                /* Add the siblings to the plus nodes
+                                * */
+                                children[0]["siblings"] = siblings;
+
+                            }
+                            else {
+                                for (i = 0; i < objects.length; i++) {
+                                    children[i] = {name: objects[i].objName, "children": null, "type": "object"};
+                                }
                             }
                         }
                     }
@@ -318,6 +409,7 @@
                         }
                     }
                     return children;
+
                 }
 
                 function pidFop(ps, level){
