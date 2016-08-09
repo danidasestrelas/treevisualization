@@ -214,12 +214,12 @@
                         else  return d._children ? "lightsteelblue" : "#fff"; });
 
 
-               /**nodeEnter.append("svg:image")
-               .attr("xlink:href", function (d) { return d.name == 0 ? "keyBlue.png" : "";})
+               nodeEnter.append("svg:image")
+               .attr("xlink:href", function (d) { return d.type == "key" ? "key.svg" : ( d.type == "master" ? "masterkey.svg": ( d.type == "object" ? "file.svg": "pluskey.svg"));})
                 .attr("x", "-24px")
                 .attr("y", "-24px")
-                .attr("width", "48px")
-                .attr("height", "48px");*/
+                .attr("width", "37px")
+                .attr("height", "37px");
 
 
                // the label of the node
@@ -236,30 +236,9 @@
                   .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
 
                 // the new style after the transition
-              nodeUpdate.select("circle")
-                  .attr("r", function(d) {  return d.type == "object" ? 0 : 10; })
-                  .style("fill", function(d) {
-                      if (d.type == "master") return "#f4c0c0";
-                      else  return d._children ? "lightsteelblue" : "#fff"; })
-                  .style("stroke", function(d) {
-                      if (d.type == "master")
-                          return "red";
-                        else if(d.type == "object")
-                          return "gray";
-                        else
-                          return "steelblue";  });
+              
 
-                nodeUpdate.select("rect")
-                    .attr("width",function(d) {  return d.type == "object" ? 10 : 0; } )
-                    .attr("height",function(d) {  return d.type == "object" ? 15 : 0; } )
-                    .style("fill", function(d) {  return d._children ? "lightsteelblue" : "#fff"; })
-                    .style("stroke", function(d) {
-                        if (d.type == "master")
-                          return "red";
-                        else if(d.type == "object")
-                          return "gray";
-                        else
-                          return "steelblue";  });
+
 
               nodeUpdate.select("text")
                   .style("fill-opacity", 1);
