@@ -375,7 +375,7 @@
                                 /* Creates the first plus node with no siblings
                                 * show: false , because it will not appear yet
                                 * */
-                                children[0] = {name: "up", "children": null, "type": "up", "show": false};
+                                children[0] = {name: "...", "children": null, "type": "up", "show": false};
                                 /* Iterates in all children
                                 * */
                                 for (i = 0; i < 5; i++) {
@@ -391,7 +391,7 @@
                                 /* Add the siblings to the plus nodes
                                 * */
                                 //children[0]["siblings"] = siblings;
-                                children[6] = {name: "down", "children": null, "type": "down", "show": false};
+                                children[6] = {name: "...", "children": null, "type": "down", "show": false};
 
                             }
                             else {
@@ -410,15 +410,35 @@
                         var last = (parent+1)*data.partitionSize;
                         var childs;
 
+
+                        children[0] = {"name": "...", "children": null, "type": "up"};
+                        k = 1;
                         for (i = first; i <= last; i++) { // for each child of this parent
                             if (data.usedPartitions.indexOf(i) > -1) {
-                                if (level < data.levels)
+
+                                if(k < 6){
                                     childs = getChildren(i, level + 1, data);
                                     children[k] = {"name": i, "children": childs[0], "siblings": childs[1] , "type": "key"};
+                                }
+                                else{
+                                    childs = getChildren(i, level + 1, data);
+                                    siblings[k-7] = {"name": i, "children":null ,"_children": childs[0], "siblings": childs[1] , "type": "key"};
+                                }
+
+                                k++;
                             }
                             // if a node is not in used partitions, it is not showed
-                            k++;
+
                         }
+
+                        if(children.length < 7 && siblings.length == 0){
+                            children.splice(0,1);
+                        }
+                        else{
+                            children[children.length] = {"name": "...", "children": null, "type": "down"};
+                        }
+
+
                     }
                     return [children, siblings];
 
