@@ -307,7 +307,7 @@
               });
             }
 
-             function clickPlus(d){
+            function clickPlus(d){
                  /* Remove the last 5 children from the parent
                  * */
                  var newSiblings = d.parent.children.splice(-5,5);
@@ -340,7 +340,7 @@
                     * */
                     var name = 0; //pidFop(data.partitionSize, 0);  it is always 0
                     var children = getChildren(name, 1, data);
-                    return [{"name": name, "children": children, "type": "master"}];
+                    return [{"name": name, "children": children[0], "type": "master"}];
                 }
 
                 function getChildren(parent, level, data){
@@ -398,17 +398,19 @@
                         * */
                         var first = (parent*data.partitionSize) + 1;
                         var last = (parent+1)*data.partitionSize;
+                        var childs;
 
                         for (i = first; i <= last; i++) { // for each child of this parent
                             if (data.usedPartitions.indexOf(i) > -1) {
                                 if (level < data.levels)
-                                    children[k] = {"name": i, "children": getChildren(i, level + 1, data), "type": "key"};
+                                    childs = getChildren(i, level + 1, data);
+                                    children[k] = {"name": i, "children": childs[0], "type": "key"};
                             }
                             // if a node is not in used partitions, it is not showed
                             k++;
                         }
                     }
-                    return children;
+                    return [children, siblings];
 
                 }
 
