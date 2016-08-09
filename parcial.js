@@ -195,8 +195,10 @@
                   .attr("class", "node")
                   .attr("transform", function() { return "translate(" + source.y0 + "," + source.x0 + ")"; })
                   .on("click", function(d){
-                      if(d.type == "plus")
-                          return clickPlus(d);
+                      if(d.type == "down")
+                          return clickDown(d);
+                      else if (d.type == "up")
+                          return clickUp(d);
                       else return click(d)});
 
                 // append circles and rectangles to the nodes
@@ -307,20 +309,27 @@
               });
             }
 
-            function clickPlus(d){
+            function clickDown(d){
                  /* Remove the last 5 children from the parent
                  * */
-                 var newSiblings = d.parent.children.splice(-5,5);
+                 var newSiblings = d.parent.children.splice(-6,5);
+                 var newChildren = d.parent.siblings.splice(0,5);
 
-                 console.log(d.parent.children);
-                 console.log(d.siblings);
 
-                 var newChildren = d.siblings.splice(0,5);
-
-                 d.parent.children = d.parent.children.concat(newChildren);
-                 d.siblings = d.siblings.concat(newSiblings);
+                 newChildren.forEach(function(e){d.parent.children.splice(-1,0,e);});
+                 d.parent.siblings = d.parent.siblings.concat(newSiblings);
                  update(d);
              }
+            function clickUp(d){
+                 var newSiblings = d.parent.children.splice(-6,5);
+                 var newChildren = d.parent.siblings.splice(d.parent.siblings.length - 5,5);
+
+
+
+                 newChildren.forEach(function(e){d.parent.children.splice(-1,0,e);});
+                 d.parent.siblings =  newSiblings.concat(d.parent.siblings);
+                 update(d);
+            }
             // Toggle children on click.
             function click(d) {
               if (d.children) {
@@ -340,7 +349,7 @@
                     * */
                     var name = 0; //pidFop(data.partitionSize, 0);  it is always 0
                     var children = getChildren(name, 1, data);
-                    return [{"name": name, "children": children[0], "type": "master"}];
+                    return [{"name": name, "children": children[0], "siblings": children[1], "type": "master"}];
                 }
 
                 function getChildren(parent, level, data){
@@ -366,7 +375,7 @@
                                 /* Creates the first plus node with no siblings
                                 * show: false , because it will not appear yet
                                 * */
-                                children[0] = {name: "up", "children": null, "type": "plus", "siblings": siblings, "show": false};
+                                children[0] = {name: "up", "children": null, "type": "up", "show": false};
                                 /* Iterates in all children
                                 * */
                                 for (i = 0; i < 5; i++) {
@@ -381,7 +390,8 @@
                                 }
                                 /* Add the siblings to the plus nodes
                                 * */
-                                children[0]["siblings"] = siblings;
+                                //children[0]["siblings"] = siblings;
+                                children[6] = {name: "down", "children": null, "type": "down", "show": false};
 
                             }
                             else {
@@ -404,7 +414,7 @@
                             if (data.usedPartitions.indexOf(i) > -1) {
                                 if (level < data.levels)
                                     childs = getChildren(i, level + 1, data);
-                                    children[k] = {"name": i, "children": childs[0], "type": "key"};
+                                    children[k] = {"name": i, "children": childs[0], "siblings": childs[1] , "type": "key"};
                             }
                             // if a node is not in used partitions, it is not showed
                             k++;
