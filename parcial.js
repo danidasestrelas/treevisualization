@@ -399,9 +399,9 @@
                                     childs = getChildren(i, level + 1, data);
                                     children[k] = {"name": i, "children": childs[0], "siblings": childs[1] , "type": "key"};
                                 }
-                                else{
+                                else{console.log(i);console.log(k);
                                     childs = getChildren(i, level + 1, data);
-                                    siblings[k-7] = {"name": i, "children":null ,"_children": childs[0], "siblings": childs[1] , "type": "key"};
+                                    siblings[k-6] = {"name": i, "children":null ,"_children": childs[0], "siblings": childs[1] , "type": "key"};
                                 }
 
                                 k++;
