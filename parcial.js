@@ -217,7 +217,7 @@
                nodeEnter.append("svg:image")
                .attr("xlink:href", function (d) { return d.type == "key" ? "key.svg" : ( d.type == "master" ? "masterkey.svg": ( d.type == "object" ? "file.svg":
                    (d.type == "up" || d.type == "down" ? "pluskey.svg" : "plusfile.svg") ));})
-                .attr("x", "-24px")
+                .attr("x", "-10px")
                 .attr("y", "-24px")
                 .attr("width", "37px")
                 .attr("height", "37px");
@@ -225,7 +225,7 @@
 
                // the label of the node
               nodeEnter.append("text")
-                  .attr("x", function(d) { return d.children || d._children ? -13 : 13; })
+                  .attr("x", function(d) { return d.children || d._children ? -13 : 25; })
                   .attr("dy", ".35em")
                   .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
                   .text(function(d) { return d.name; })
