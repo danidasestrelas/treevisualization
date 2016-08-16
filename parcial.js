@@ -195,9 +195,9 @@
                   .attr("class", "node")
                   .attr("transform", function() { return "translate(" + source.y0 + "," + source.x0 + ")"; })
                   .on("click", function(d){
-                      if(d.type == "down")
+                      if(d.type == "down" || d.type == "object_down")
                           return clickDown(d);
-                      else if (d.type == "up")
+                      else if (d.type == "up" || d.type == "object_up")
                           return clickUp(d);
                       else return click(d)});
 
@@ -215,7 +215,8 @@
 
 
                nodeEnter.append("svg:image")
-               .attr("xlink:href", function (d) { return d.type == "key" ? "key.svg" : ( d.type == "master" ? "masterkey.svg": ( d.type == "object" ? "file.svg": "pluskey.svg"));})
+               .attr("xlink:href", function (d) { return d.type == "key" ? "key.svg" : ( d.type == "master" ? "masterkey.svg": ( d.type == "object" ? "file.svg":
+                   (d.type == "up" || d.type == "down" ? "pluskey.svg" : "plusfile.svg") ));})
                 .attr("x", "-24px")
                 .attr("y", "-24px")
                 .attr("width", "37px")
@@ -294,7 +295,6 @@
                  var newSiblings = d.parent.children.splice(-6,5);
                  var newChildren = d.parent.siblings.splice(0,5);
 
-
                  newChildren.forEach(function(e){d.parent.children.splice(-1,0,e);});
                  d.parent.siblings = d.parent.siblings.concat(newSiblings);
                  update(d);
@@ -302,8 +302,6 @@
             function clickUp(d){
                  var newSiblings = d.parent.children.splice(-6,5);
                  var newChildren = d.parent.siblings.splice(d.parent.siblings.length - 5,5);
-
-
 
                  newChildren.forEach(function(e){d.parent.children.splice(-1,0,e);});
                  d.parent.siblings =  newSiblings.concat(d.parent.siblings);
@@ -354,7 +352,7 @@
                                 /* Creates the first plus node with no siblings
                                 * show: false , because it will not appear yet
                                 * */
-                                children[0] = {name: "...", "children": null, "type": "up", "show": false};
+                                children[0] = {name: "...", "children": null, "type": "object_up", "show": false};
                                 /* Iterates in all children
                                 * */
                                 for (i = 0; i < 5; i++) {
@@ -370,7 +368,7 @@
                                 /* Add the siblings to the plus nodes
                                 * */
                                 //children[0]["siblings"] = siblings;
-                                children[6] = {name: "...", "children": null, "type": "down", "show": false};
+                                children[6] = {name: "...", "children": null, "type": "object_down", "show": false};
 
                             }
                             else {
@@ -399,7 +397,7 @@
                                     childs = getChildren(i, level + 1, data);
                                     children[k] = {"name": i, "children": childs[0], "siblings": childs[1] , "type": "key"};
                                 }
-                                else{console.log(i);console.log(k);
+                                else{
                                     childs = getChildren(i, level + 1, data);
                                     siblings[k-6] = {"name": i, "children":null ,"_children": childs[0], "siblings": childs[1] , "type": "key"};
                                 }
