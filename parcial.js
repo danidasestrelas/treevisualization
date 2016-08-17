@@ -40,7 +40,7 @@
                     root = dataset[0];
                     root.x0 = height / 2;
                     root.y0 = 0;
-                      
+
                     update(root);
 
                     d3.select(self.frameElement).style("height", "500px");
@@ -195,8 +195,10 @@
                   .attr("class", "node")
                   .attr("transform", function() { return "translate(" + source.y0 + "," + source.x0 + ")"; })
                   .on("click", function(d){
-                      if(d.type == "plus")
-                          return clickPlus(d);
+                      if(d.type == "down" || d.type == "object_down")
+                          return clickDown(d);
+                      else if (d.type == "up" || d.type == "object_up")
+                          return clickUp(d);
                       else return click(d)});
 
                 // append circles and rectangles to the nodes
@@ -212,17 +214,18 @@
                         else  return d._children ? "lightsteelblue" : "#fff"; });
 
 
-               /**nodeEnter.append("svg:image")
-               .attr("xlink:href", function (d) { return d.name == 0 ? "keyBlue.png" : "";})
-                .attr("x", "-24px")
+               nodeEnter.append("svg:image")
+               .attr("xlink:href", function (d) { return d.type == "key" ? "key.svg" : ( d.type == "master" ? "masterkey.svg": ( d.type == "object" ? "file.svg":
+                   (d.type == "up" || d.type == "down" ? "pluskey.svg" : "plusfile.svg") ));})
+                .attr("x", "-10px")
                 .attr("y", "-24px")
-                .attr("width", "48px")
-                .attr("height", "48px");*/
+                .attr("width", "37px")
+                .attr("height", "37px");
 
 
                // the label of the node
               nodeEnter.append("text")
-                  .attr("x", function(d) { return d.children || d._children ? -13 : 13; })
+                  .attr("x", function(d) { return d.children || d._children ? -13 : 25; })
                   .attr("dy", ".35em")
                   .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
                   .text(function(d) { return d.name; })
@@ -234,30 +237,9 @@
                   .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
 
                 // the new style after the transition
-              nodeUpdate.select("circle")
-                  .attr("r", function(d) {  return d.type == "object" ? 0 : 10; })
-                  .style("fill", function(d) {
-                      if (d.type == "master") return "#f4c0c0";
-                      else  return d._children ? "lightsteelblue" : "#fff"; })
-                  .style("stroke", function(d) {
-                      if (d.type == "master")
-                          return "red";
-                        else if(d.type == "object")
-                          return "gray";
-                        else
-                          return "steelblue";  });
+              
 
-                nodeUpdate.select("rect")
-                    .attr("width",function(d) {  return d.type == "object" ? 10 : 0; } )
-                    .attr("height",function(d) {  return d.type == "object" ? 15 : 0; } )
-                    .style("fill", function(d) {  return d._children ? "lightsteelblue" : "#fff"; })
-                    .style("stroke", function(d) {
-                        if (d.type == "master")
-                          return "red";
-                        else if(d.type == "object")
-                          return "gray";
-                        else
-                          return "steelblue";  });
+
 
               nodeUpdate.select("text")
                   .style("fill-opacity", 1);
@@ -307,20 +289,66 @@
               });
             }
 
-             function clickPlus(d){
+            function clickDown(d){
+                console.log(d.parent);
+                // add the list up object
+                if(d.parent.siblings_up.length == 0) {
+                    if (d.type == "object_down")
+                        d.parent.children.splice(0, 0, {"name": "up", "children": null, "type": "object_up"});
+                    else
+                        d.parent.children.splice(0, 0, {"name": "up", "children": null, "type": "up"});
+                }
                  /* Remove the last 5 children from the parent
                  * */
-                 var newSiblings = d.parent.children.splice(-5,5);
+                 var newSiblings;
 
-                 console.log(d.parent.children);
-                 console.log(d.siblings);
+                if(d.parent.siblings_up.lenght == 0)
+                   newSiblings = d.parent.children.splice(0,d.parent.children.length -1);
+                else
+                   newSiblings = d.parent.children.splice(-6,5);
+                // Take new children from the siblings_down
+                 var newChildren = d.parent.siblings_down.splice(0,5);
+                 newChildren.forEach(function(e){d.parent.children.splice(-1,0,e);});
 
-                 var newChildren = d.siblings.splice(0,5);
+                // put the old children in siblings_up
+                 d.parent.siblings_up = d.parent.siblings_up.concat(newSiblings);
 
-                 d.parent.children = d.parent.children.concat(newChildren);
-                 d.siblings = d.siblings.concat(newSiblings);
+                // if comes to the end of the list siblings_down, remove the list down objetc
+                if(d.parent.siblings_down.length == 0)
+                    d.parent.children.splice(-1,1);
+
+                console.log(d.parent);
                  update(d);
              }
+            function clickUp(d){
+
+                // take the new children
+                var newChildren = d.parent.siblings_up.splice(d.parent.siblings_up.length -5,5);
+
+                var newSiblings;
+                // remove children
+                if(d.parent.siblings_down.length == 0){
+                    newSiblings = d.parent.children.splice(1, d.parent.children.length - 1);
+
+                    if (d.type == "object_up")
+                        d.parent.children.splice(1, 0, {"name": "down", "children": null, "type": "object_down"});
+                    else
+                        d.parent.children.splice(1, 0, {"name": "down", "children": null, "type": "down"});
+                }
+                else{
+                    newSiblings = d.parent.children.splice(-6,5);
+                }
+
+                newChildren.forEach(function(e){d.parent.children.splice(-1,0,e);});
+
+
+                d.parent.siblings_down =  newSiblings.concat(d.parent.siblings_down);
+
+                if(d.parent.siblings_up.length == 0)
+                    d.parent.children.splice(0,1);
+
+                 update(d);
+            }
             // Toggle children on click.
             function click(d) {
               if (d.children) {
@@ -340,7 +368,7 @@
                     * */
                     var name = 0; //pidFop(data.partitionSize, 0);  it is always 0
                     var children = getChildren(name, 1, data);
-                    return [{"name": name, "children": children, "type": "master"}];
+                    return [{"name": name, "children": children[0],"siblings_up": null, "siblings_down": children[1], "type": "master"}];
                 }
 
                 function getChildren(parent, level, data){
@@ -366,14 +394,15 @@
                                 /* Creates the first plus node with no siblings
                                 * show: false , because it will not appear yet
                                 * */
-                                children[0] = {name: "up", "children": null, "type": "plus", "siblings": siblings, "show": false};
+                                //children[0] = {name: "...", "children": null, "type": "object_up", "show": false};
                                 /* Iterates in all children
                                 * */
                                 for (i = 0; i < 5; i++) {
                                     /* Just plus nodes have siblings
                                     * */
-                                    children[i+1] = {name: objects[i].objName, "children": null, "type": "object", "show": true};
+                                    children[i] = {name: objects[i].objName, "children": null, "type": "object", "show": true};
                                 }
+
                                 for(i= 5; i < objects.length; i++){
                                     /* Hide the children
                                      * */
@@ -381,7 +410,8 @@
                                 }
                                 /* Add the siblings to the plus nodes
                                 * */
-                                children[0]["siblings"] = siblings;
+                                //children[0]["siblings"] = siblings;
+                                children[5] = {name: "...", "children": null, "type": "object_down", "show": false};
 
                             }
                             else {
@@ -398,17 +428,40 @@
                         * */
                         var first = (parent*data.partitionSize) + 1;
                         var last = (parent+1)*data.partitionSize;
+                        var childs;
 
+
+                        children[0] = {"name": "...", "children": null, "type": "up"};
+                        k = 1;
                         for (i = first; i <= last; i++) { // for each child of this parent
                             if (data.usedPartitions.indexOf(i) > -1) {
-                                if (level < data.levels)
-                                    children[k] = {"name": i, "children": getChildren(i, level + 1, data), "type": "key"};
+
+                                if(k < 6){
+                                    childs = getChildren(i, level + 1, data);
+                                    children[k] = {"name": i, "children": childs[0], "siblings_up": [], "siblings_down": childs[1] , "type": "key"};
+                                }
+                                else{
+                                    childs = getChildren(i, level + 1, data);
+                                    siblings[k-6] = {"name": i, "children": null ,"_children": childs[0], "siblings_up": [], "siblings_down": childs[1] , "type": "key"};
+                                }
+
+                                k++;
                             }
                             // if a node is not in used partitions, it is not showed
-                            k++;
+
                         }
+
+                        if(children.length < 7 && siblings.length == 0){
+                            children.splice(0,1);
+                        }
+                        else{
+                            children.splice(0,1);
+                            children[children.length] = {"name": "...", "children": null, "type": "down"};
+                        }
+
+
                     }
-                    return children;
+                    return [children, siblings];
 
                 }
 
