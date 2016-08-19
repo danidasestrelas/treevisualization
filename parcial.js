@@ -41,9 +41,7 @@
                     root.x0 = height / 2;
                     root.y0 = 0;
 
-                    
                     d3.select(self.frameElement).style("height", "500px");
-
 
                     var open = [];
                     /* For the start configuration of the tree
@@ -55,6 +53,7 @@
                     }
                     inicialTree = open;
                     closeTree(root, open);
+                    update(root);
 
                     /* reset button using the open list configuration
                     * */
@@ -196,13 +195,13 @@
                 
             }
 
+
             function closeTree(source, openNodes){
                 /* Uses the click function to let just the nodes
                 *  in the array openNodes open in the tree. the remain
                 *  do not show its children
                 * */
               var nodes = tree.nodes(source).reverse();
-                var inChildren;
 
                 nodes.forEach(function(d) {
                     /* The actual node d is the node tested to be in the path
@@ -210,11 +209,11 @@
                     * */
 
                     if (d.children != null && openNodes.indexOf(d.name) < 0) {
-                        click(d);
+                        changeChildren(d);
                         //console.log(d);
                     }
                     else if(d._children != null &&  openNodes.indexOf(d.name) >-1){
-                        click(d);
+                        changeChildren(d);
                     }
                 });
             }
@@ -392,14 +391,17 @@
                  update(d);
             }
             // Toggle children on click.
-            function click(d) {
-              if (d.children) {
+            function changeChildren(d){
+                if (d.children) {
                 d._children = d.children;
                 d.children = null;
               } else {
                 d.children = d._children;
                 d._children = null;
               }
+            }
+            function click(d) {
+              changeChildren(d);
               update(d);
             }
 
