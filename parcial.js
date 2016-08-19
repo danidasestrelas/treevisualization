@@ -41,8 +41,7 @@
                     root.x0 = height / 2;
                     root.y0 = 0;
 
-                    update(root);
-
+                    
                     d3.select(self.frameElement).style("height", "500px");
 
 
@@ -98,13 +97,53 @@
                     .on("click", function(){
                         var path = [];
                         leafPath(text.property("value"),data.partitionSize,path);
+                        console.log(path);
+                        rightChildren(root,path,text.property("value)"));
                         closeTree(root, path);
+
                     });
 
                 }
 
 
             });
+
+            function rightChildren(source, openNodes, object ) {
+
+                var nodes = tree.nodes(source).reverse();
+                var inChildren;
+
+                console.log(openNodes);
+
+                nodes.forEach(function(d) {
+                    /* The actual node d is the node tested to be in the path
+                    *  So to open & show the path, the node d have to be in its parent children
+                    * */
+
+                    inChildren = 0;
+                    if (openNodes.indexOf(d.name) > -1 && d.name != "0") {
+                        console.log(d.name);
+                        console.log(d.parent.children);
+
+
+                        d.parent.children.forEach(function (e) {
+                            console.log(e.name+" "+d.name);
+                            if (e.name == d.name) inChildren = 1;
+                        });
+
+                        if (!inChildren && d.parent.siblings_down != 0) {
+                            clickDown(d.parent.children[d.parent.children.length - 1]);
+                        }
+                        else console.log("sdjksd");
+
+
+
+                    }
+
+                });
+
+
+            }
 
             function leafPathName(name, data, path) {
                 /* Receives the name of the object
@@ -163,8 +202,13 @@
                 *  do not show its children
                 * */
               var nodes = tree.nodes(source).reverse();
+                var inChildren;
 
                 nodes.forEach(function(d) {
+                    /* The actual node d is the node tested to be in the path
+                    *  So to open & show the path, the node d have to be in its parent children
+                    * */
+
                     if (d.children != null && openNodes.indexOf(d.name) < 0) {
                         click(d);
                         //console.log(d);
@@ -290,7 +334,6 @@
             }
 
             function clickDown(d){
-                console.log(d.parent);
                 // add the list up object
                 if(d.parent.siblings_up.length == 0) {
                     if (d.type == "object_down")
@@ -317,7 +360,6 @@
                 if(d.parent.siblings_down.length == 0)
                     d.parent.children.splice(-1,1);
 
-                console.log(d.parent);
                  update(d);
              }
             function clickUp(d){
