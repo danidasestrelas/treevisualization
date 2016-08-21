@@ -95,11 +95,11 @@
                     .attr("value", "Search Node")
                     .on("click", function(){
                         var path = [];
-                        leafPath(text.property("value"),data.partitionSize,path);
-                        console.log(path);
-                        rightChildren(root,path,text.property("value)"));
+                        var aux = text.property("value").toString().split("|");
+                        leafPath( parseInt(aux[0]),data.partitionSize,path);
+                        rightChildren(root,path,aux[1]);
                         closeTree(root, path);
-
+                        update(root);
                     });
 
                 }
@@ -108,70 +108,57 @@
             });
 
             function rightChildren(source, openNodes, object ) {
+                /* Go through all children
+                * */
+                var inChildren = 0;
+                var next = null;
+                var down = 1;
 
-                var nodes = tree.nodes(source).reverse();
-                var inChildren;
+                if(source._children != null){
+                    click(source);
 
-                console.log(openNodes);
+                }
 
-                nodes.forEach(function(d) {
-                    /* The actual node d is the node tested to be in the path
-                    *  So to open & show the path, the node d have to be in its parent children
-                    * */
+                if(source.children != null) {
+                    while (!inChildren) {
 
-                    inChildren = 0;
-                    if (openNodes.indexOf(d.name) > -1 && d.name != "0") {
-                        console.log(d.name);
-                        console.log(d.parent.children);
+                        source.children.forEach(function (d) {
 
-
-                        d.parent.children.forEach(function (e) {
-                            console.log(e.name+" "+d.name);
-                            if (e.name == d.name) inChildren = 1;
+                            if (openNodes.indexOf(d.name) > -1 && d.type == "key") {
+                                inChildren = 1;
+                                next = d;
+                            }
+                            else if (d.type == "object" && d.name == object) {
+                                inChildren = 1;
+                            }
                         });
 
-                        if (!inChildren && d.parent.siblings_down != 0) {
-                            clickDown(d.parent.children[d.parent.children.length - 1]);
-                        }
-                        else console.log("sdjksd");
-
-
-
-                    }
-
-                });
-
-
-            }
-
-            function leafPathName(name, data, path) {
-                /* Receives the name of the object
-                * and search for it in objectMapping
-                * returning the number of the parent
-                * */
-                var parent = null;
-                for(i in data.objectMapping)
-                {
-                    for(var j = 0; j < data.objectMapping[i].length; j++){
-                        if(data.objectMapping[i][j] != null && data.objectMapping[i][j].objName == name){
-                            parent = i;
-                            break;
+                        if (!inChildren) {
+                            if(down) {
+                                clickDown(source.children[source.children.length - 1]);
+                                if(source.siblings_down.length == 0){
+                                    down = 0;
+                                }
+                            }
+                            else{
+                                clickUp(source.children[0]);
+                                if(source.siblings_up.length == 0){
+                                    down = 1;
+                                }
+                            }
                         }
                     }
                 }
 
-                /* Founded the parent takes the path in the tree
-                * */
-                if(parent != null){
-                    leafPath(parent, data.partitionSize, path);
+                if(next != null){
+                    rightChildren(next,openNodes,object);
                 }
 
             }
 
             function leafPath(value, ps, path){
-                var aux = value.toString().split("|");
-                var number = parseInt(aux[0]);
-                var name = aux[1];
+
+                var number = value;
                 /* By a number/key node name, finds all the path
                 *  from the root to this current number
                 *  returning it in a list
@@ -184,17 +171,6 @@
                   path.push(0);
               }
             }
-
-            function highlightObj(name, path){
-                /* Go through the root structure to change
-                * the color of the object selected
-                * */
-                var i = 0;
-                path.reverse();
-
-                
-            }
-
 
             function closeTree(source, openNodes){
                 /* Uses the click function to let just the nodes
@@ -217,8 +193,6 @@
                     }
                 });
             }
-
-
 
             function update(source) {
 
