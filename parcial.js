@@ -94,18 +94,25 @@
                     .attr("type", "button")
                     .attr("value", "Search Node")
                     .on("click", function(){
-                        var path = [];
-                        var aux = text.property("value").toString().split("|");
-                        leafPath( parseInt(aux[0]),data.partitionSize,path);
-                        rightChildren(root,path,aux[1]);
-                        closeTree(root, path);
-                        update(root);
+                        searchNode(root, text, data);
                     });
 
                 }
 
 
             });
+            /* text is a string in the format "parent|object_name"
+            *  source is the root tree
+            *  data is the raw data from the json file
+            * */
+            function searchNode(source, text, data){
+                var path = [];
+                var aux = text.property("value").toString().split("|");
+                leafPath( parseInt(aux[0]),data.partitionSize,path);
+                rightChildren(source,path,aux[1]);
+                closeTree(source, path);
+                update(root);
+            }
 
             function rightChildren(source, openNodes, object ) {
                 /* Go through all children
