@@ -317,9 +317,9 @@
                 // add the list up object
                 if(d.parent.siblings_up.length == 0) {
                     if (d.type == "object_down")
-                        d.parent.children.splice(0, 0, {"name": "up", "children": null, "type": "object_up"});
+                        d.parent.children.splice(0, 0, {"name": "↑", "children": null, "type": "object_up"});
                     else
-                        d.parent.children.splice(0, 0, {"name": "up", "children": null, "type": "up"});
+                        d.parent.children.splice(0, 0, {"name": "↑", "children": null, "type": "up"});
                 }
                  /* Remove the last 5 children from the parent
                  * */
@@ -353,9 +353,9 @@
                     newSiblings = d.parent.children.splice(1, d.parent.children.length - 1);
 
                     if (d.type == "object_up")
-                        d.parent.children.splice(1, 0, {"name": "down", "children": null, "type": "object_down"});
+                        d.parent.children.splice(1, 0, {"name": "↓", "children": null, "type": "object_down"});
                     else
-                        d.parent.children.splice(1, 0, {"name": "down", "children": null, "type": "down"});
+                        d.parent.children.splice(1, 0, {"name": "↓", "children": null, "type": "down"});
                 }
                 else{
                     newSiblings = d.parent.children.splice(-6,5);
@@ -436,7 +436,7 @@
                                 /* Add the siblings to the plus nodes
                                 * */
                                 //children[0]["siblings"] = siblings;
-                                children[5] = {name: "...", "children": null, "type": "object_down", "show": false};
+                                children[5] = {name: "↓", "children": null, "type": "object_down", "show": false};
 
                             }
                             else {
@@ -456,7 +456,7 @@
                         var childs;
 
 
-                        children[0] = {"name": "...", "children": null, "type": "up"};
+                        children[0] = {"name": "↓", "children": null, "type": "up"};
                         k = 1;
                         for (i = first; i <= last; i++) { // for each child of this parent
                             if (data.usedPartitions.indexOf(i) > -1) {
@@ -481,7 +481,7 @@
                         }
                         else{
                             children.splice(0,1);
-                            children[children.length] = {"name": "...", "children": null, "type": "down"};
+                            children[children.length] = {"name": "↓", "children": null, "type": "down"};
                         }
 
 
