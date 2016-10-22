@@ -21,11 +21,62 @@
             var diagonal = d3.svg.diagonal()
                 .projection(function(d) { return [d.y, d.x]; });
 
+            var zoom = d3.behavior.zoom().scaleExtent([0, 1]).translate([120,20]).on("zoom", zoomed);
+
             var svg = d3.select("body").append("svg")
                 .attr("width", width + margin.right + margin.left)
                 .attr("height", height + margin.top + margin.bottom)
               .append("g")
-                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+                .call(zoom);
+
+            function zoomed() {
+                svg.attr("transform",
+                    "translate(" + zoom.translate() + ")" +
+                    "scale(" + zoom.scale() + ")"
+                );
+            }
+
+            function interpolateZoom (translate, scale) {
+                var self = this;
+                return d3.transition().duration(duration).tween("zoom", function () {
+                    var iTranslate = d3.interpolate(zoom.translate(), translate),
+                        iScale = d3.interpolate(zoom.scale(), scale);
+                    return function (t) {
+                        zoom
+                            .scale(iScale(t))
+                            .translate(iTranslate(t));
+                        zoomed();
+                    };
+                });
+            }
+
+            function zoomClick() {
+                var factor = 0.5,
+                    center = [width / 2, height / 2],
+                    extent = zoom.scaleExtent(),
+                    translate = zoom.translate(),
+                    view = {x: translate[0], y: translate[1], k: zoom.scale()};
+
+                d3.event.preventDefault();
+                direction = (this.id === 'zoom_in') ? 2 : -1;
+                console.log(extent);
+                target_zoom = zoom.scale() * (1 + factor * direction);
+
+
+
+                translate0 = [(center[0] - view.x) / view.k, (center[1] - view.y) / view.k];
+                view.k = target_zoom;
+                l = [translate0[0] * view.k + view.x, translate0[1] * view.k + view.y];
+
+                view.x += center[0] - l[0];
+                view.y += center[1] - l[1];
+                console.log(zoom.translate());
+
+                interpolateZoom([120, 20], view.k);
+            }
+
+            d3.selectAll('button').on('click', zoomClick);
 
             
 
@@ -54,6 +105,9 @@
                     inicialTree = open;
                     closeTree(root, open);
                     update(root);
+
+
+                    //TODO loadNode(root, "4375|110", data);
 
                     /* reset button using the open list configuration
                     * */
@@ -101,6 +155,15 @@
 
 
             });
+
+            function loadNode(source, text, data){
+                var path = [];
+                var aux = text.split("|");
+                leafPath( parseInt(aux[0]),data.partitionSize,path);
+                rightChildren(source,path,aux[1]);
+                closeTree(source, path);
+                update(root);
+            }
             /* text is a string in the format "parent|object_name"
             *  source is the root tree
             *  data is the raw data from the json file
