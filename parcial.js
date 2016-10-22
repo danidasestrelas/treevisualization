@@ -30,6 +30,9 @@
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
                 .call(zoom);
 
+             /* Zoom functions area
+             *
+             * */
             function zoomed() {
                 svg.attr("transform",
                     "translate(" + zoom.translate() + ")" +
@@ -253,13 +256,14 @@
                     /* The actual node d is the node tested to be in the path
                     *  So to open & show the path, the node d have to be in its parent children
                     * */
-
-                    if (d.children != null && openNodes.indexOf(d.name) < 0) {
-                        changeChildren(d);
-                        //console.log(d);
-                    }
-                    else if(d._children != null &&  openNodes.indexOf(d.name) >-1){
-                        changeChildren(d);
+                    if(d.type != "key_object") {
+                        if (d.children != null && openNodes.indexOf(d.name) < 0) {
+                            changeChildren(d);
+                            //console.log(d);
+                        }
+                        else if (d._children != null && openNodes.indexOf(d.name) > -1) {
+                            changeChildren(d);
+                        }
                     }
                 });
             }
@@ -303,7 +307,7 @@
 
                nodeEnter.append("svg:image")
                .attr("xlink:href", function (d) { return d.type == "key" ? "key.svg" : ( d.type == "master" ? "masterkey.svg": ( d.type == "object" ? "file.svg":
-                   (d.type == "up" || d.type == "down" ? "pluskey.svg" : "plusfile.svg") ));})
+                   (d.type == "key_object" ? "key_object.svg": (d.type == "up" || d.type == "down" ? "pluskey.svg" : "pluskey_object.svg") )));})
                 .attr("x", "-10px")
                 .attr("y", "-24px")
                 .attr("width", "37px")
@@ -488,13 +492,13 @@
                                 for (i = 0; i < 5; i++) {
                                     /* Just plus nodes have siblings
                                     * */
-                                    children[i] = {name: objects[i].objName, "children": null, "type": "object", "show": true};
+                                    children[i] = {name: objects[i].slot, "children": [{name:objects[i].objName, "type": "object"}], "type": "key_object", "show": true};
                                 }
 
                                 for(i= 5; i < objects.length; i++){
                                     /* Hide the children
                                      * */
-                                    siblings[i-5] = {name: objects[i].objName, "children": null, "type": "object","show": false };
+                                    siblings[i-5] = {name: objects[i].slot, "children": [{name:objects[i].objName, "type": "object"}], "type": "key_object","show": false };
                                 }
                                 /* Add the siblings to the plus nodes
                                 * */
@@ -504,7 +508,7 @@
                             }
                             else {
                                 for (i = 0; i < objects.length; i++) {
-                                    children[i] = {name: objects[i].objName, "children": null, "type": "object"};
+                                    children[i] = {name: objects[i].slot, "children":[{name:objects[i].objName, "type": "object"}], "type": "object"};
                                 }
                             }
                         }
