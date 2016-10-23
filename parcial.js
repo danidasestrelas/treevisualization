@@ -175,9 +175,27 @@
                 var path = [];
                 var aux = text.property("value").toString().split("|");
                 leafPath( parseInt(aux[0]),data.partitionSize,path);
+
+                
                 rightChildren(source,path,aux[1]);
                 closeTree(source, path);
                 update(root);
+            }
+
+            function leafPath(value, ps, path){
+
+                var number = value;
+                /* By the number/key node name, finds all the path
+                *  from the root to this current number
+                *  returning it in a list
+                * */
+              if(number>0){
+                var parent = parseInt((number-1)/ps);
+                path.push(number);
+                  leafPath(parent, ps, path);
+              }else {
+                  path.push(0);
+              }
             }
 
             function rightChildren(source, openNodes, object ) {
@@ -187,7 +205,10 @@
                 var next = null;
                 var down = 1;
 
+                /* Testes if the node is not closed, then open it
+                * */
                 if(source._children != null){
+                    //console.log(source);
                     click(source);
 
                 }
@@ -197,13 +218,18 @@
 
                         source.children.forEach(function (d) {
 
-                            if (openNodes.indexOf(d.name) > -1 && d.type == "key") {
+                            /* See if this node is in the OpenNodes list
+                            *  if it is and it is a "key" type, goes to the next node
+                            *  if it is a "key_object" type
+                            *  */
+                            if (openNodes.indexOf(d.name) > -1 && (d.type == "key") ) {
                                 inChildren = 1;
                                 next = d;
                             }
-                            else if (d.type == "object" && d.name == object) {
+                            else if(d.type == "key_object" && d.children[0].name == object) {
                                 inChildren = 1;
                             }
+
                         });
 
                         if (!inChildren) {
@@ -229,22 +255,6 @@
 
             }
 
-            function leafPath(value, ps, path){
-
-                var number = value;
-                /* By a number/key node name, finds all the path
-                *  from the root to this current number
-                *  returning it in a list
-                * */
-              if(number>0){
-                var parent = parseInt((number-1)/ps);
-                path.push(number);
-                  leafPath(parent, ps, path);
-              }else {
-                  path.push(0);
-              }
-            }
-
             function closeTree(source, openNodes){
                 /* Uses the click function to let just the nodes
                 *  in the array openNodes open in the tree. the remain
@@ -267,6 +277,9 @@
                     }
                 });
             }
+
+
+
 
             function update(source) {
 
