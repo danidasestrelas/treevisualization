@@ -176,7 +176,7 @@
                 var aux = text.property("value").toString().split("|");
                 leafPath( parseInt(aux[0]),data.partitionSize,path);
 
-                
+
                 rightChildren(source,path,aux[1]);
                 closeTree(source, path);
                 update(root);
@@ -278,14 +278,13 @@
                 });
             }
 
-
-
-
             function update(source) {
 
               // Compute the new tree layout.
               var nodes = tree.nodes(root).reverse(),  // list of the nodes objects, descending
                   links = tree.links(nodes);
+
+                console.log(nodes);
 
               // Normalize for fixed-depth.
               nodes.forEach(function(d) { d.y = d.depth * 100; }); // the distance between nodes
@@ -306,16 +305,22 @@
                       else return click(d)});
 
                 // append circles and rectangles to the nodes
-              nodeEnter.append("circle")
-                  .attr("r", 1e-6)
-                  .style("fill", function(d) {  return d._children ? "lightsteelblue" : "#fff"; });
+
+                function rectHeight(d){
+
+                    var inicial = d.x;
+                    var final = d.parent.children[d.parent.children.length -1].x;
+                    console.log(d);
+                    return final - inicial + 50;
+                }
+
 
                 nodeEnter.append("rect")
-                    .attr("width", 0)
-                    .attr("height", 0)
-                    .style("fill", function(d) {
-                        if (d.type == "master") return "#f26363";
-                        else  return d._children ? "lightsteelblue" : "#fff"; });
+                    .attr("width", function(d){ return (d.type == "key" && isFirstChild(d))? 40 : null;})
+                    .attr("height",  function(d){ return (d.type == "key" && isFirstChild(d))? rectHeight(d): null;})
+                 .attr("x", "-10px")
+                .attr("y", "-24px")
+                .style("fill-opacity", 1e-6);
 
 
                nodeEnter.append("svg:image")
@@ -354,11 +359,12 @@
                   .attr("transform", function() { return "translate(" + source.y + "," + source.x + ")"; })
                   .remove();
 
-              nodeExit.select("circle")
-                  .attr("r", 1e-6);
+
 
               nodeExit.select("text")
                   .style("fill-opacity", 1e-6);
+
+
 
               // Update the links…
               var link = svg.selectAll("path.link")
@@ -391,6 +397,14 @@
                 d.x0 = d.x;
                 d.y0 = d.y;
               });
+            }
+
+            function isFirstChild(d){
+                var first = pidFop(dataP.partitionSize, d.level);
+
+                if(d.name == first)
+                    return true;
+                else return false;
             }
 
             function clickDown(d){
@@ -467,6 +481,10 @@
             }
 
 
+            /* The next functions are responsible for the translation of the
+            * json data to the Flare data, which is used by the drawing functions
+            * of d3js to build a tree
+            * */
                 function jsonToFlare(data){
                     /* Start with the root of the tree that is always 0
                     *  Then get all the other nodes recursively using getChildren
@@ -475,103 +493,115 @@
                     var children = getChildren(name, 1, data);
                     return [{"name": name, "children": children[0],"siblings_up": null, "siblings_down": children[1], "type": "master"}];
                 }
-
+                /* This functions gets the actual node(parent) and calculates
+                * who will be its children.
+                * For just the key_partitions part of the tree, it uses two calculations
+                * to get the first child and the last child of this node
+                * and check if the children are in the usedPartitions list.
+                * For the object_partitions, it just access the ObjectMapping object
+                * and get the list of objects based on the node/parent name
+                * and creates the right data from it.
+                * */
                 function getChildren(parent, level, data){
-                    var children = [];
-                    var siblings = [];
-                    var k = 0;
-                    var i;
-                    if(level == data.levels){
-                        /* Case that maps the objects keys to the leafs
-                        *  their behavior is different since their name is not related to te tree structure
-                        *  as are the non-objects-partitions nodes
-                        * */
-                        var objects = data.objectMapping[parent];
-
-                        /* Sort the objects by the slot number
-                        * */
-                        objects.sort(function(a,b){ return a.slot-b.slot});
-
-                        if(objects != null) {
-
-                            if (objects.length > 5){
-
-                                /* Creates the first plus node with no siblings
-                                * show: false , because it will not appear yet
-                                * */
-                                //children[0] = {name: "...", "children": null, "type": "object_up", "show": false};
-                                /* Iterates in all children
-                                * */
-                                for (i = 0; i < 5; i++) {
-                                    /* Just plus nodes have siblings
-                                    * */
-                                    children[i] = {name: objects[i].slot, "children": [{name:objects[i].objName, "type": "object"}], "type": "key_object", "show": true};
-                                }
-
-                                for(i= 5; i < objects.length; i++){
-                                    /* Hide the children
-                                     * */
-                                    siblings[i-5] = {name: objects[i].slot, "children": [{name:objects[i].objName, "type": "object"}], "type": "key_object","show": false };
-                                }
-                                /* Add the siblings to the plus nodes
-                                * */
-                                //children[0]["siblings"] = siblings;
-                                children[5] = {name: "↓", "children": null, "type": "object_down", "show": false};
-
-                            }
-                            else {
-                                for (i = 0; i < objects.length; i++) {
-                                    children[i] = {name: objects[i].slot, "children":[{name:objects[i].objName, "type": "object"}], "type": "object"};
-                                }
-                            }
-                        }
-                    }
-                    else {
-                        /* For the actual parent node it calculates the first and last children
-                        * and see if all its interval of children are in the used partition
-                        * and add the ones that are
-                        * */
-                        var first = (parent*data.partitionSize) + 1;
-                        var last = (parent+1)*data.partitionSize;
-                        var childs;
-
-
-                        children[0] = {"name": "↓", "children": null, "type": "up"};
-                        k = 1;
-                        for (i = first; i <= last; i++) { // for each child of this parent
-                            if (data.usedPartitions.indexOf(i) > -1) {
-
-                                if(k < 6){
-                                    childs = getChildren(i, level + 1, data);
-                                    children[k] = {"name": i, "children": childs[0], "siblings_up": [], "siblings_down": childs[1] , "type": "key"};
-                                }
-                                else{
-                                    childs = getChildren(i, level + 1, data);
-                                    siblings[k-6] = {"name": i, "children": null ,"_children": childs[0], "siblings_up": [], "siblings_down": childs[1] , "type": "key"};
-                                }
-
-                                k++;
-                            }
-                            // if a node is not in used partitions, it is not showed
-
-                        }
-
-                        if(children.length < 7 && siblings.length == 0){
-                            children.splice(0,1);
-                        }
-                        else{
-                            children.splice(0,1);
-                            children[children.length] = {"name": "↓", "children": null, "type": "down"};
-                        }
-
-
-                    }
-                    return [children, siblings];
-
-                }
-
-                function pidFop(ps, level){
-                    /* Calculates the first node of a level
+                var children = [];
+                var siblings = [];
+                var k = 0;
+                var i;
+                if(level == data.levels){
+                    /* Case that maps the objects keys to the leafs
+                    *  their behavior is different since their name is not related to te tree structure
+                    *  as are the non-objects-partitions nodes
                     * */
-                    return (Math.pow(ps, level) - 1)/(ps-1);
+                    var objects = data.objectMapping[parent];
+
+                    /* Sort the objects by the slot number
+                    * */
+                    objects.sort(function(a,b){ return a.slot-b.slot});
+
+                    if(objects != null) {
+
+                        if (objects.length > 5){
+
+                            /* Creates the first plus node with no siblings
+                            * show: false , because it will not appear yet
+                            * */
+                            //children[0] = {name: "...", "children": null, "type": "object_up", "show": false};
+                            /* Iterates in all children
+                            * */
+                            for (i = 0; i < 5; i++) {
+                                /* Just plus nodes have siblings
+                                * */
+                                children[i] = {name: objects[i].slot, "children": [{name:objects[i].objName, "type": "object"}], "type": "key_object"};
+                            }
+
+                            for(i= 5; i < objects.length; i++){
+                                /* Hide the children
+                                 * */
+                                siblings[i-5] = {name: objects[i].slot, "children": [{name:objects[i].objName, "type": "object"}], "type": "key_object"};
+                            }
+                            /* Add the siblings to the plus nodes
+                            * */
+                            //children[0]["siblings"] = siblings;
+                            children[5] = {name: "↓", "children": null, "type": "object_down"};
+
+                        }
+                        else {
+                            for (i = 0; i < objects.length; i++) {
+                                children[i] = {name: objects[i].slot, "children":[{name:objects[i].objName, "type": "object"}], "type": "object"};
+                            }
+                        }
+                    }
                 }
+                else {
+                    /* For the actual parent node it calculates the first and last children
+                    * and see if all its interval of children are in the used partition
+                    * and add the ones that are
+                    * */
+                    var first = (parent*data.partitionSize) + 1;
+                    var last = (parent+1)*data.partitionSize;
+                    var childs;
+
+
+                    children[0] = {"name": "↓", "children": null, "type": "up"};
+                    k = 1;
+                    for (i = first; i <= last; i++) {
+                        // for each child of this parent
+                        // just create nodes for the children that are in the usedPartitions
+                        if (data.usedPartitions.indexOf(i) > -1) {
+
+                            if(k < 6){
+                                childs = getChildren(i, level + 1, data);
+                                children[k] = {"name": i, "children": childs[0], "siblings_up": [], "siblings_down": childs[1] , "type": "key", "level": level};
+                            }
+                            else{
+                                childs = getChildren(i, level + 1, data);
+                                siblings[k-6] = {"name": i, "children": null ,"_children": childs[0], "siblings_up": [], "siblings_down": childs[1] , "type": "key", "level": level};
+                            }
+
+                            k++;
+                        }
+                        // if a node is not in used partitions, it is not showed because performance issues
+                    }
+
+                    if(children.length < 7 && siblings.length == 0){
+                        children.splice(0,1);
+                    }
+                    else{
+                        children.splice(0,1);
+                        children[children.length] = {"name": "↓", "children": null, "type": "down"};
+                    }
+
+
+                }
+                return [children, siblings];
+
+            }
+
+            /* End data translations functions
+            * */
+
+            function pidFop(ps, level){
+                /* Calculates the first node of a level
+                * */
+                return (Math.pow(ps, level) - 1)/(ps-1);
+            }
