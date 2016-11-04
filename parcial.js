@@ -261,13 +261,13 @@ function rightChildren(source, openNodes, object) {
 
             if (!inChildren) {
                 if (down) {
-                    clickDown(source.children[source.children.length - 1]);
+                    siblingsDown(source.children[source.children.length - 1]);
                     if (source.siblings_down.length == 0) {
                         down = 0;
                     }
                 }
                 else {
-                    clickUp(source.children[0]);
+                    siblingsUp(source.children[0]);
                     if (source.siblings_up.length == 0) {
                         down = 1;
                     }
@@ -471,8 +471,12 @@ function update(source) {
         d.y0 = d.y;
     });
 }
-
 function clickDown(d) {
+    siblingsDown(d);
+    update(d);
+}
+
+function siblingsDown(d) {
     // add the list up object
     if (d.parent.siblings_up.length == 0) {
         if (d.type == "object_down")
@@ -501,9 +505,13 @@ function clickDown(d) {
     if (d.parent.siblings_down.length == 0)
         d.parent.children.splice(-1, 1);
 
+    //update(d);
+}
+function clickUp(d){
+    siblingsUp(d);
     update(d);
 }
-function clickUp(d) {
+function siblingsUp(d) {
 
     // take the new children
     var newChildren = d.parent.siblings_up.splice(d.parent.siblings_up.length - 5, 5);
@@ -532,7 +540,7 @@ function clickUp(d) {
     if (d.parent.siblings_up.length == 0)
         d.parent.children.splice(0, 1);
 
-    update(d);
+    //update(d);
 }
 // Toggle children on click.
 function changeChildren(d) {
