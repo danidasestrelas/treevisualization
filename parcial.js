@@ -5,7 +5,7 @@ var jsonFile = "minitree.json";
 var icon_file = "plusfile.svg";
 var icon_key = "key.svg";
 var icon_masterkey = "masterkey.svg";
-var icon_plusfile = "plusfile.svg";
+var icon_plusfile = "pluskey_object.svg";
 var icon_pluskey = "pluskey.svg";
 var icon_object = "key_object.svg";
 
