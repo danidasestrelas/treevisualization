@@ -472,14 +472,6 @@ function update(source) {
     });
 }
 
-function isFirstChild(d) {
-    var first = pidFop(dataP.partitionSize, d.level);
-
-    if (d.name == first)
-        return true;
-    else return false;
-}
-
 function clickDown(d) {
     // add the list up object
     if (d.parent.siblings_up.length == 0) {
