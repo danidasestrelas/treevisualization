@@ -32,12 +32,7 @@ var diagonal = d3.svg.diagonal()
 
 var zoom = d3.behavior.zoom().scaleExtent([0, 1]).translate([120, 20]).on("zoom", zoomed);
 
-var svg = d3.select("body").append("svg")
-    .attr("width", width + margin.right + margin.left)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-    .call(zoom);
+var svg;
 
 /* Zoom functions area
  *
@@ -93,7 +88,8 @@ d3.selectAll('button').on('click', zoomClick);
 /* Ends zoom function */
 
 
-
+/* Loads the data from file and renders the tree
+* */
 d3.json(jsonFile, function (error, data) {
     if (error) {
         console.log(error);
@@ -113,6 +109,13 @@ function renderTree(data) {
     root.y0 = 0;
 
     d3.select(self.frameElement).style("height", "500px");
+
+    svg = d3.select("body").append("svg")
+    .attr("width", width + margin.right + margin.left)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    .call(zoom);
 
     var open = [];
     /* For the start configuration of the tree
@@ -199,9 +202,8 @@ function loadNode(source, text, data) {
 function searchNode(source, text, data) {
     var path = [];
     var aux = text.property("value").toString().split("|");
+
     leafPath(parseInt(aux[0]), data.partitionSize, path);
-
-
     rightChildren(source, path, aux[1]);
     closeTree(source, path);
     update(root);
