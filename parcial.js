@@ -68,7 +68,6 @@ function zoomClick() {
 
     d3.event.preventDefault();
     direction = (this.id === 'zoom_in') ? 2 : -1;
-    console.log(extent);
     target_zoom = zoom.scale() * (1 + factor * direction);
 
 
@@ -78,7 +77,6 @@ function zoomClick() {
 
     view.x += center[0] - l[0];
     view.y += center[1] - l[1];
-    console.log(zoom.translate());
 
     interpolateZoom([120, 20], view.k);
 }
@@ -311,7 +309,6 @@ function update(source) {
     var nodes = tree.nodes(root).reverse(),  // list of the nodes objects, descending
         links = tree.links(nodes);
 
-    console.log(nodes);
 
     // Normalize for fixed-depth.
     nodes.forEach(function (d) {
@@ -365,10 +362,13 @@ function update(source) {
 
     nodeEnter.append("rect")
         .attr("width", function (d) {
-            return (d.type == "key") ? 40 : null
+            return (d.type == "key" || d.type == "key_object") ? 40 : null
         })
         .attr("height", function (d) {
-            return (d.type == "key") ? rectHeight(d) : null;
+            return (d.type == "key" || d.type == "key_object") ? rectHeight(d) : null;
+        })
+        .attr("class", function(d){
+            return (d.type == "key" ) ? "key" : "object";
         })
         .attr("x", "-10px")
         .attr("y", "-24px")
@@ -411,10 +411,13 @@ function update(source) {
 
     nodeUpdate.select("rect")
         .attr("width", function (d) {
-            return (d.type == "key") ? 40 : null
+            return (d.type == "key" || d.type == "key_object") ? 40 : null
         })
         .attr("height", function (d) {
-            return (d.type == "key") ? rectHeight(d) : null;
+            return (d.type == "key" || d.type == "key_object") ? rectHeight(d) : null;
+        })
+        .attr("class", function(d){
+            return (d.type == "key") ? "key" : "object";
         })
         .attr("x", "-10px")
         .attr("y", "-24px")

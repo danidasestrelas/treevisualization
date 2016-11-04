@@ -2,9 +2,19 @@
         cursor: pointer;
     }
 
-    .node circle, rect {
+    .node circle {
       fill: #fff;
       stroke: steelblue;
+      stroke-width: 3px;
+    }
+    .key{
+      fill: #fff;
+      stroke: steelblue;
+      stroke-width: 3px;
+    }
+    .object{
+      fill: #fff;
+      stroke: #838383;
       stroke-width: 3px;
     }
 
