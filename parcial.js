@@ -388,10 +388,8 @@ function update(source) {
 
     // the label of the node
     nodeEnter.append("text")
-        .attr("x", function (d) {
-            return d.children || d._children ? -13 : 25;
-        })
-        .attr("dy", ".35em")
+        .attr("x", 23)
+        .attr("dy", "1.5em")
         .attr("text-anchor", function (d) {
             return d.children || d._children ? "end" : "start";
         })
