@@ -309,15 +309,29 @@
                 function rectHeight(d){
 
                     var inicial = d.x;
-                    var final = d.parent.children[d.parent.children.length -1].x;
-                    console.log(d);
-                    return final - inicial + 50;
+                    var final;
+                    var next = false;
+                        d.parent.children.forEach(function(e){
+
+                           if(e.name == d.name +1){
+                               final = e.x;
+                               next = true;
+                           }
+                        });
+
+                        if(!next){
+                            if(d.parent.children[d.parent.children.length -1].type == "down")
+                                final = d.parent.children[d.parent.children.length -1].x;
+                            else final = inicial + 60;
+                        }
+
+                    return  final - inicial;
                 }
 
 
                 nodeEnter.append("rect")
-                    .attr("width", function(d){ return (d.type == "key" && isFirstChild(d))? 40 : null;})
-                    .attr("height",  function(d){ return (d.type == "key" && isFirstChild(d))? rectHeight(d): null;})
+                    .attr("width", function(d){ return (d.type == "key")? 40 : null})
+                    .attr("height",  function(d){ return (d.type == "key")? rectHeight(d): null;})
                  .attr("x", "-10px")
                 .attr("y", "-24px")
                 .style("fill-opacity", 1e-6);
@@ -347,7 +361,12 @@
 
                 // the new style after the transition
               
-
+             nodeUpdate.select("rect")
+                    .attr("width", function(d){ return (d.type == "key")? 40 : null})
+                    .attr("height",  function(d){ return (d.type == "key")? rectHeight(d): null;})
+                 .attr("x", "-10px")
+                .attr("y", "-24px")
+                .style("fill-opacity", 1e-6);
 
 
               nodeUpdate.select("text")
