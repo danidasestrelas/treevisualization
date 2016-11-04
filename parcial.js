@@ -1,10 +1,6 @@
 /* This file is released under the GNU General Public License, version 3
  * */
 var jsonFile = "minitree.json";
-var dataset;
-var dataP;
-var inicialTree = [];
-var text;
 
 var icon_file = "plusfile.svg";
 var icon_key = "key.svg";
@@ -12,6 +8,11 @@ var icon_masterkey = "masterkey.svg";
 var icon_plusfile = "plusfile.svg";
 var icon_pluskey = "pluskey.svg";
 var icon_object = "key_object.svg";
+
+var dataset;
+var dataP;
+var inicialTree = [];
+var text;
 
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
     width = 1000 - margin.right - margin.left,
@@ -40,6 +41,7 @@ var svg = d3.select("body").append("svg")
 
 /* Zoom functions area
  *
+ * Note: the var zoom is created to be called by the svg --> line 33
  * */
 function zoomed() {
     svg.attr("transform",
@@ -88,6 +90,9 @@ function zoomClick() {
 
 d3.selectAll('button').on('click', zoomClick);
 
+/* Ends zoom function */
+
+
 
 d3.json(jsonFile, function (error, data) {
     if (error) {
@@ -96,79 +101,81 @@ d3.json(jsonFile, function (error, data) {
         console.log(data);
 
         dataP = data;
-        dataset = jsonToFlare(data);
-        root = dataset[0];
-        root.x0 = height / 2;
-        root.y0 = 0;
-
-        d3.select(self.frameElement).style("height", "500px");
-
-        var open = [];
-        /* For the start configuration of the tree
-         * takes the first node of each level and let
-         * their open
-         * */
-        for (var i = 0; i < data.levels - 1; i++) {
-            open.push(pidFop(data.partitionSize, i));
-        }
-        inicialTree = open;
-        closeTree(root, open);
-        update(root);
-
-
-        //TODO loadNode(root, "4375|110", data);
-
-        /* reset button using the open list configuration
-         * */
-        d3.select("body").append("input")
-            .attr("type", "button")
-            .attr("value", "Reset Tree")
-            .on("click", function () {
-                closeTree(root, open)
-            });
-
-        /* Create the select list for the objects names
-         * */
-        text = d3.select("body").append("select")
-            .attr('id', "valueText");
-
-        /* add to the objects from the objectsMapping
-         * a link to their father in order to find the path
-         * for then later when the user selects an object
-         * */
-        var optionList = [];
-        for (i in data.objectMapping) {
-            for (var j = 0; j < data.objectMapping[i].length; j++) {
-                if (data.objectMapping[i][j] != null)
-                    data.objectMapping[i][j]['parent'] = i;
-            }
-            optionList = optionList.concat(data.objectMapping[i]);
-        }
-        /* The value of an <option> is the parent number
-         * */
-        text.selectAll('option')
-            .data(optionList).enter()
-            .append('option').text(function (d) {
-            return d.objName
-        })
-            .attr('value', function (d) {
-                return d.parent + "|" + d.objName
-            });
-
-        /* By clicking the search button it calls the leafPath function
-         *  with the value of the option selected
-         * */
-        d3.select("body").append("input")
-            .attr("type", "button")
-            .attr("value", "Search Node")
-            .on("click", function () {
-                searchNode(root, text, data);
-            });
+        renderTree(data);
 
     }
-
-
 });
+
+function renderTree(data) {
+    dataset = jsonToFlare(data);
+    root = dataset[0];
+    root.x0 = height / 2;
+    root.y0 = 0;
+
+    d3.select(self.frameElement).style("height", "500px");
+
+    var open = [];
+    /* For the start configuration of the tree
+     * takes the first node of each level and let
+     * their open
+     * */
+    for (var i = 0; i < data.levels - 1; i++) {
+        open.push(pidFop(data.partitionSize, i));
+    }
+    inicialTree = open;
+    closeTree(root, open);
+    update(root);
+
+
+    //TODO loadNode(root, "4375|110", data);
+
+    /* reset button using the open list configuration
+     * */
+    d3.select("body").append("input")
+        .attr("type", "button")
+        .attr("value", "Reset Tree")
+        .on("click", function () {
+            closeTree(root, open)
+        });
+
+    /* Create the select list for the objects names
+     * */
+    text = d3.select("body").append("select")
+        .attr('id', "valueText");
+
+    /* add to the objects from the objectsMapping
+     * a link to their father in order to find the path
+     * for then later when the user selects an object
+     * */
+    var optionList = [];
+    for (i in data.objectMapping) {
+        for (var j = 0; j < data.objectMapping[i].length; j++) {
+            if (data.objectMapping[i][j] != null)
+                data.objectMapping[i][j]['parent'] = i;
+        }
+        optionList = optionList.concat(data.objectMapping[i]);
+    }
+    /* The value of an <option> is the parent number
+     * */
+    text.selectAll('option')
+        .data(optionList).enter()
+        .append('option').text(function (d) {
+        return d.objName
+    })
+        .attr('value', function (d) {
+            return d.parent + "|" + d.objName
+        });
+
+    /* By clicking the search button it calls the leafPath function
+     *  with the value of the option selected
+     * */
+    d3.select("body").append("input")
+        .attr("type", "button")
+        .attr("value", "Search Node")
+        .on("click", function () {
+            searchNode(root, text, data);
+        });
+}
 
 function loadNode(source, text, data) {
     var path = [];
