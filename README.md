@@ -2,6 +2,9 @@
 
 The purpose is to make a visualization of a big tree structure using d3js.
 
+## Functions Calls
+![Function Calls](images/functionCalls.png)
+
 ## Animation [ ]
 There will be animation to add and delete objects in the tree leafs.
 
