@@ -236,7 +236,7 @@ function rightChildren(source, openNodes, object) {
      * */
     if (source._children != null) {
         //console.log(source);
-        click(source);
+        changeChildren(source);
 
     }
 
