@@ -129,52 +129,59 @@ function renderTree(data) {
 
     //TODO loadNode(root, "4375|110", data);
 
-    /* reset button using the open list configuration
-     * */
-    d3.select("body").append("input")
-        .attr("type", "button")
-        .attr("value", "Reset Tree")
-        .on("click", function () {
-            closeTree(root, open)
-        });
+    /*
+    * Bellow are the buttons to "Reset tree" and "Search Node"
+    * used only in the development file
+    * */
 
-    /* Create the select list for the objects names
+    /* "Reset Tree" button using the open list configuration
      * */
-    text = d3.select("body").append("select")
-        .attr('id', "valueText");
+        d3.select("body").append("input")
+            .attr("type", "button")
+            .attr("value", "Reset Tree")
+            .on("click", function () {
+                closeTree(root, open);
+                update(root);
+            });
 
-    /* add to the objects from the objectsMapping
-     * a link to their father in order to find the path
-     * for then later when the user selects an object
+    /* "Search Node" button and selection list
+     * Create the select list for the objects names
      * */
-    var optionList = [];
-    for (i in data.objectMapping) {
-        for (var j = 0; j < data.objectMapping[i].length; j++) {
-            if (data.objectMapping[i][j] != null)
-                data.objectMapping[i][j]['parent'] = i;
+        text = d3.select("body").append("select")
+            .attr('id', "valueText");
+
+        /* add to the objects from the objectsMapping
+         * a link to their father in order to find the path
+         * for then later when the user selects an object
+         * */
+        var optionList = [];
+        for (i in data.objectMapping) {
+            for (var j = 0; j < data.objectMapping[i].length; j++) {
+                if (data.objectMapping[i][j] != null)
+                    data.objectMapping[i][j]['parent'] = i;
+            }
+            optionList = optionList.concat(data.objectMapping[i]);
         }
-        optionList = optionList.concat(data.objectMapping[i]);
-    }
-    /* The value of an <option> is the parent number
-     * */
-    text.selectAll('option')
-        .data(optionList).enter()
-        .append('option').text(function (d) {
-        return d.objName
-    })
-        .attr('value', function (d) {
-            return d.parent + "|" + d.objName
-        });
+        /* The value of an <option> is the parent number
+         * */
+        text.selectAll('option')
+            .data(optionList).enter()
+            .append('option').text(function (d) {
+            return d.objName
+        })
+            .attr('value', function (d) {
+                return d.parent + "|" + d.objName
+            });
 
-    /* By clicking the search button it calls the leafPath function
-     *  with the value of the option selected
-     * */
-    d3.select("body").append("input")
-        .attr("type", "button")
-        .attr("value", "Search Node")
-        .on("click", function () {
-            searchNode(root, text, data);
-        });
+        /* By clicking the search button it calls the leafPath function
+         *  with the value of the option selected
+         * */
+        d3.select("body").append("input")
+            .attr("type", "button")
+            .attr("value", "Search Node")
+            .on("click", function () {
+                searchNode(root, text, data);
+            });
 }
 
 function loadNode(source, text, data) {
