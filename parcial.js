@@ -309,11 +309,11 @@ function update(source) {
     var nodes = tree.nodes(root).reverse(),  // list of the nodes objects, descending
         links = tree.links(nodes);
 
-
     // Normalize for fixed-depth.
     nodes.forEach(function (d) {
-        d.y = d.depth * 100;
+        d.y = d.depth * 75;
     }); // the distance between nodes
+
 
     // Update the nodes…
     var node = svg.selectAll("g.node")
@@ -380,7 +380,7 @@ function update(source) {
             return d.type == "key" ? icon_key : ( d.type == "master" ? icon_masterkey : ( d.type == "object" ? icon_file :
                 (d.type == "key_object" ? icon_object : (d.type == "up" || d.type == "down" ? icon_pluskey : icon_plusfile) )));
         })
-        .attr("x", "-10px")
+        .attr("x", "-9px")
         .attr("y", "-24px")
         .attr("width", "37px")
         .attr("height", "37px");
@@ -419,7 +419,8 @@ function update(source) {
         })
         .attr("x", "-10px")
         .attr("y", "-24px")
-        .style("fill-opacity", 1e-6);
+        .style("fill", function (d) { return d._children ? "lightsteelblue" : "#fff" })
+        .style("fill-opacity", 1);
 
 
     nodeUpdate.select("text")
