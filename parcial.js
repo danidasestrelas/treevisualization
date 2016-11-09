@@ -419,7 +419,7 @@ function update(source) {
         })
         .attr("x", "-10px")
         .attr("y", "-24px")
-        .style("fill", function (d) { return d._children ? "lightsteelblue" : "#fff" })
+        .style("fill", function (d) { return d._children ? (d.type == "key" ? "lightsteelblue": "#c3c3c3" ) : "#fff" })
         .style("fill-opacity", 1);
 
 
