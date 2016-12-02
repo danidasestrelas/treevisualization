@@ -8,12 +8,13 @@ function SdosSheetController() {
 
     var jsonFile = "minitree.json";
 
-    var icon_file = "plusfile.svg";
-    var icon_key = "key.svg";
-    var icon_masterkey = "masterkey.svg";
-    var icon_plusfile = "pluskey_object.svg";
-    var icon_pluskey = "pluskey.svg";
-    var icon_object = "key_object.svg";
+    var icon_file = "/angular/icons/d3/plusfile.svg";
+    var icon_key = "/angular/icons/d3/key.svg";
+    var icon_masterkey = "/angular/icons/d3/masterkey.svg";
+    var icon_plusfile = "/angular/icons/d3/pluskey_object.svg";
+    var icon_pluskey = "/angular/icons/d3/pluskey.svg";
+    var icon_object = "/angular/icons/d3/key_object.svg";
+    var icon_selectedfile = "/angular/icons/d3/selected_file.svg"
 
     var dataset;
     var dataP;
@@ -50,7 +51,10 @@ function SdosSheetController() {
     var svg;
 
 
-    /* Loads the data from file and renders the tree
+    /*
+     *
+     * Rendering functions
+     *
      * */
     d3.json(jsonFile, function (error, data) {
         if (error) {
@@ -63,76 +67,6 @@ function SdosSheetController() {
 
         }
     });
-
-    /* Zoom functions area
-     *
-     * Note: the var zoom is created to be called by the svg --> line 33
-     * */
-    function zoomed() {
-        svg.attr("transform",
-            "translate(" + zoom.translate() + ")" +
-            "scale(" + zoom.scale() + ")"
-        );
-    }
-
-    function interpolateZoom(translate, scale) {
-        var self = this;
-        return d3.transition().duration(duration).tween("zoom", function () {
-            var iTranslate = d3.interpolate(zoom.translate(), translate),
-                iScale = d3.interpolate(zoom.scale(), scale);
-            return function (t) {
-                zoom
-                    .scale(iScale(t))
-                    .translate(iTranslate(t));
-                zoomed();
-            };
-        });
-    }
-
-    function zoomClick(id) {
-        var factor = 0.5,
-            center = [width / 2, height / 2],
-            extent = zoom.scaleExtent(),
-            translate = zoom.translate(),
-            view = {x: translate[0], y: translate[1], k: zoom.scale()};
-
-        d3.event.preventDefault();
-        var direction = (id === 'zoom_in') ? 2 : -1;
-        var target_zoom = zoom.scale() * (1 + factor * direction);
-
-
-        var translate0 = [(center[0] - view.x) / view.k, (center[1] - view.y) / view.k];
-        view.k = target_zoom;
-        var l = [translate0[0] * view.k + view.x, translate0[1] * view.k + view.y];
-
-        view.x += center[0] - l[0];
-        view.y += center[1] - l[1];
-
-        interpolateZoom([120, 20], view.k);
-    }
-
-    function buttonClick() {
-        console.log(this.id);
-        if (this.id == 'zoom_in' || this.id == 'zoom_out') {
-
-            return zoomClick(this.id);
-        }
-        else {
-            animateClick(this.id);
-        }
-    }
-
-    function animateClick(id) {
-        if (animate_operations[id]) {
-            console.log(animate_operations[id]);
-        }
-
-    }
-
-    d3.selectAll('button').on('click', buttonClick);
-
-    /* Ends zoom function */
-
 
     function renderTree(data) {
         console.log("rendering: " + data);
@@ -219,7 +153,86 @@ function SdosSheetController() {
                 searchNode(root, text, data);
             });
     }
+    /*
+    * Ends rendering functions
+    * */
 
+
+    /* Zoom functions area
+     *
+     * Note: the var zoom is created to be called by the svg --> line 33
+     * */
+    function zoomed() {
+        svg.attr("transform",
+            "translate(" + zoom.translate() + ")" +
+            "scale(" + zoom.scale() + ")"
+        );
+    }
+
+    function interpolateZoom(translate, scale) {
+        var self = this;
+        return d3.transition().duration(duration).tween("zoom", function () {
+            var iTranslate = d3.interpolate(zoom.translate(), translate),
+                iScale = d3.interpolate(zoom.scale(), scale);
+            return function (t) {
+                zoom
+                    .scale(iScale(t))
+                    .translate(iTranslate(t));
+                zoomed();
+            };
+        });
+    }
+
+    function zoomClick(id) {
+        var factor = 0.5,
+            center = [width / 2, height / 2],
+            extent = zoom.scaleExtent(),
+            translate = zoom.translate(),
+            view = {x: translate[0], y: translate[1], k: zoom.scale()};
+
+        d3.event.preventDefault();
+        var direction = (id === 'zoom_in') ? 2 : -1;
+        var target_zoom = zoom.scale() * (1 + factor * direction);
+
+
+        var translate0 = [(center[0] - view.x) / view.k, (center[1] - view.y) / view.k];
+        view.k = target_zoom;
+        var l = [translate0[0] * view.k + view.x, translate0[1] * view.k + view.y];
+
+        view.x += center[0] - l[0];
+        view.y += center[1] - l[1];
+
+        interpolateZoom([120, 20], view.k);
+    }
+
+    function buttonClick() {
+        console.log(this.id);
+        if (this.id == 'zoom_in' || this.id == 'zoom_out') {
+
+            return zoomClick(this.id);
+        }
+        else {
+            animateClick(this.id);
+        }
+    }
+
+    function animateClick(id) {
+        if (animate_operations[id]) {
+            console.log(animate_operations[id]);
+        }
+
+    }
+
+    d3.selectAll('button').on('click', buttonClick);
+
+    /* Ends zoom functions */
+
+
+    /*
+    *
+    * Selecting path and objects functions
+    *
+    * */
     function loadNode(source, text, data) {
         var path = [];
         var aux = text.split("|");
@@ -343,6 +356,16 @@ function SdosSheetController() {
             }
         });
     }
+    /*
+    * ends Selecting path and objects functions
+    * */
+
+
+    /*
+    *
+    * Animation functions
+    *
+    * */
 
     function newAnimation(d, visited_keys) {
         setTimeout(function () {
@@ -387,7 +410,7 @@ function SdosSheetController() {
 
         setTimeout(function () {
             if (d.parent) {
-                d.parent.operation = "selected";
+                d.parent.operation = "selecting";
                 update(d.parent);
                 visited_keys.push(d);
                 selectingAnimation(d.parent, visited_keys, callback);
@@ -399,6 +422,10 @@ function SdosSheetController() {
 
     }
 
+    /*
+    * End animations functions
+    *
+    * */
 
     function deleteAnimation(d) {
         selectingAnimation(d, [], changingKeysAnimation);
@@ -511,6 +538,8 @@ function SdosSheetController() {
         // the new style after the transition
         nodeUpdate.select("image")
             .attr("xlink:href", function (d) {
+                if(d.type == "object" && d.parent.operation == "selected")
+                    return icon_selectedfile;
                 return d.operation == "new" ? icon_pluskey : (d.operation == "fade" ? "" : ( d.type == "key" ? icon_key : ( d.type == "master" ? icon_masterkey : ( d.type == "object" ? icon_file :
                     (d.type == "key_object" ? icon_object : (d.type == "up" || d.type == "down" ? icon_pluskey : icon_plusfile) )))));
             });
@@ -532,12 +561,16 @@ function SdosSheetController() {
             .style("fill-opacity", 1)
             //TODO IDEA 1
             .style("stroke", function (d) {
-                return d.operation == "selected" ? "#dd0000" : "steelblue"
+                return d.operation == "selected" ? "#DA6B03" : ( d.operation == "selecting"? "#B83737" :"steelblue")
             })
         ;
 
 
         nodeUpdate.select("text")
+            .style("fill", function (d) {
+                if(d.type == "object" && d.parent.operation == "selected")
+                    return "#DA6B03";
+            })
             .style("fill-opacity", function (d) {
                 return d.operation == "fade" && (d.type == "key_object" || d.type == "object" ) ? 0 : 1;
             });
@@ -590,6 +623,11 @@ function SdosSheetController() {
         });
     }
 
+    /*
+    *
+    * Function for navigation and click events
+    *
+    * */
     function clickDown(d) {
         siblingsDown(d);
         update(d);
@@ -679,6 +717,9 @@ function SdosSheetController() {
         changeChildren(d);
         update(d);
     }
+    /*
+    * Ends navigation and click events functions
+    * */
 
 
     /* The next functions are responsible for the translation of the
