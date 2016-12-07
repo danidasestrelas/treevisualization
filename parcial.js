@@ -21,6 +21,8 @@ function SdosSheetController() {
     var inicialTree = [];
     var text;
 
+    var selected_object = null;
+
     var animate_operations = {
         "back": null,
         "next": {
@@ -97,8 +99,6 @@ function SdosSheetController() {
         update(root);
 
 
-        //TODO loadNode(root, "4375|110", data);
-
         /*
          * Bellow are the buttons to "Reset tree" and "Search Node"
          * used only in the development file
@@ -152,6 +152,23 @@ function SdosSheetController() {
             .on("click", function () {
                 searchNode(root, text, data);
             });
+
+        /*
+        *  Button and camp text delete
+        * */
+
+        d3.select("#cascadeRendering").append("input")
+            .attr("type", "button")
+            .attr("value",  "delete")
+            .on("click", function (){
+                deleteAnimation(selected_object);
+            });
+
+        var delete_text = d3.select("#cascadeRendering").append("input")
+            .attr("type", "text")
+            .attr("disabled",  "disabled")
+            .attr("id", "delete_text")
+            .attr("size", 100);
     }
     /*
     * Ends rendering functions
@@ -296,18 +313,17 @@ function SdosSheetController() {
                      *  if it is and it is a "key" type, goes to the next node
                      *  if it is a "key_object" type
                      *  */
+                    d.operation = "none";
                     if (openNodes.indexOf(d.name) > -1 && (d.type == "key")) {
                         d.operation = "selected";
                         inChildren = 1;
                         next = d;
                     }
-                    else if (d.type == "key_object" && d.children[0].name == object) {
+                    else if (d.type == "key_object" && d.children[0] && d.children[0].name == object) {
                         d.operation = "selected";
                         inChildren = 1;
                     }
-                    else {
-                        d.operation = "none";
-                    }
+
 
                 });
 
@@ -369,6 +385,7 @@ function SdosSheetController() {
 
     function newAnimation(d, visited_keys) {
         setTimeout(function () {
+            d3.select("#delete_text").attr("value", "Inputing new key");
             d.operation = "new";
             update(d);
             // remove next node from visited nodes
@@ -382,6 +399,7 @@ function SdosSheetController() {
     function fadingAnimation(d, visited_keys, callback) {
         console.log(visited_keys);
         setTimeout(function () {
+            d3.select("#delete_text").attr("value", "Deleting old key");
             d.operation = "fade";
             update(d);
             // remove next node from visited nodes
@@ -410,6 +428,7 @@ function SdosSheetController() {
 
         setTimeout(function () {
             if (d.parent) {
+                d3.select("#delete_text").attr("value", "Selecting path from leaf to root");
                 d.parent.operation = "selecting";
                 update(d.parent);
                 visited_keys.push(d);
@@ -431,6 +450,10 @@ function SdosSheetController() {
         selectingAnimation(d, [], changingKeysAnimation);
     }
 
+
+    /*
+    * Drawing function
+    * */
     function update(source) {
 
         // Compute the new tree layout.
@@ -460,8 +483,16 @@ function SdosSheetController() {
                     return clickDown(d);
                 else if (d.type == "up" || d.type == "object_up")
                     return clickUp(d);
-                else if (d.type == "object")
-                    return deleteAnimation(d);
+                else if (d.type == "object") {
+                    selected_object = d;
+                    d3.select("#valueText")
+                        .property("value",
+                            d.parent.parent.name.toString()+"|"+d.name
+                        )
+                        .attr("selected", true);
+
+                    return loadNode(root, d.parent.parent.name.toString() + "|" + d.name.toString(), dataP);
+                }
                 else return click(d)
             });
 
