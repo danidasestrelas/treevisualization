@@ -101,6 +101,17 @@ function SdosSheetController() {
         update(root);
 
 
+        d3.select("#cascadeRendering").append("input")
+            .attr("type", "checkbox")
+            .attr("id", "autoAnimation")
+            .attr("checked", "checked");
+
+        d3.select("#cascadeRendering").append("span")
+            .text("Automatic animation");
+
+        d3.select("#cascadeRendering").append("br");
+
+
         /*
          * Bellow are the buttons to "Reset tree" and "Search Node"
          * used only in the development file
@@ -171,6 +182,7 @@ function SdosSheetController() {
             .attr("disabled",  "disabled")
             .attr("id", "delete_text")
             .attr("size", 100);
+
     }
     /*
     * Ends rendering functions
@@ -449,10 +461,15 @@ function SdosSheetController() {
     * */
 
     function deleteAnimation(d) {
-        console.log(animation);
+        var auto = d3.select("#autoAnimation").property("checked");
         if(!animation) {
-            animation = 1;
-            selectingAnimation(d, [], changingKeysAnimation);
+            if(auto) {
+                animation = 1;
+                selectingAnimation(d, [], changingKeysAnimation);
+            }
+            else{
+                // step by step
+            }
         }
     }
 
