@@ -21,6 +21,8 @@ function SdosSheetController() {
     var inicialTree = [];
     var text;
 
+    var animation = 0;
+
     var selected_object = null;
 
     var animate_operations = {
@@ -447,7 +449,11 @@ function SdosSheetController() {
     * */
 
     function deleteAnimation(d) {
-        selectingAnimation(d, [], changingKeysAnimation);
+        console.log(animation);
+        if(!animation) {
+            animation = 1;
+            selectingAnimation(d, [], changingKeysAnimation);
+        }
     }
 
 
