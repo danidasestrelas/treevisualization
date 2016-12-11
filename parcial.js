@@ -14,7 +14,9 @@ function SdosSheetController() {
     var icon_plusfile = "/angular/icons/d3/pluskey_object.svg";
     var icon_pluskey = "/angular/icons/d3/pluskey.svg";
     var icon_object = "/angular/icons/d3/key_object.svg";
-    var icon_selectedfile = "/angular/icons/d3/selected_file.svg"
+    var icon_selectedfile = "/angular/icons/d3/selected_file.svg";
+    var icon_key_delete = "/angular/icons/d3/key_object_delete.svg";
+    var icon_file_delete = "/angular/icons/d3/plusfile_delete.svg";
 
     var dataset;
     var dataP;
@@ -25,14 +27,6 @@ function SdosSheetController() {
 
     var selected_object = null;
 
-    var animate_operations = {
-        "back": null,
-        "next": {
-            "operation": "selecting",
-            "object": 17, //name of the object
-            "parent": 4370 // assuming the parent is given
-        }
-    };
 
     var margin = {top: 20, right: 120, bottom: 20, left: 120},
         width = 1000 - margin.right - margin.left,
@@ -107,7 +101,27 @@ function SdosSheetController() {
             .attr("checked", "checked");
 
         d3.select("#cascadeRendering").append("span")
-            .text("Automatic animation");
+            .text("Automatic animation ");
+
+        d3.select("#cascadeRendering").append("input")
+            .attr("type", "button")
+            .attr("value",  "next")
+            .on("click", function (){
+                stepAnimation(selected_object);
+            });
+
+         d3.select("#cascadeRendering").append("input")
+            .attr("type", "button")
+            .attr("value",  "delete")
+            .on("click", function (){
+                deleteAnimation(selected_object);
+            });
+
+        var delete_text = d3.select("#cascadeRendering").append("input")
+            .attr("type", "text")
+            .attr("disabled",  "disabled")
+            .attr("id", "delete_text")
+            .attr("size", 100);
 
         d3.select("#cascadeRendering").append("br");
 
@@ -170,18 +184,7 @@ function SdosSheetController() {
         *  Button and camp text delete
         * */
 
-        d3.select("#cascadeRendering").append("input")
-            .attr("type", "button")
-            .attr("value",  "delete")
-            .on("click", function (){
-                deleteAnimation(selected_object);
-            });
 
-        var delete_text = d3.select("#cascadeRendering").append("input")
-            .attr("type", "text")
-            .attr("disabled",  "disabled")
-            .attr("id", "delete_text")
-            .attr("size", 100);
 
     }
     /*
@@ -245,13 +248,6 @@ function SdosSheetController() {
         else {
             animateClick(this.id);
         }
-    }
-
-    function animateClick(id) {
-        if (animate_operations[id]) {
-            console.log(animate_operations[id]);
-        }
-
     }
 
     d3.selectAll('button').on('click', buttonClick);
@@ -397,15 +393,16 @@ function SdosSheetController() {
     *
     * */
 
-    function newAnimation(d, visited_keys) {
+    function newAnimation(d, visited_keys, callback) {
         setTimeout(function () {
             d3.select("#delete_text").attr("value", "Inputing new key");
             d.operation = "new";
             update(d);
-            // remove next node from visited nodes
-            var next = visited_keys.shift();
-            fadingAnimation(next, visited_keys, newAnimation);
-
+            if(callback) {
+                // remove next node from visited nodes
+                var next = visited_keys.shift();
+                callback(next, visited_keys, newAnimation);
+            }
         }, 750);
 
     }
@@ -413,18 +410,28 @@ function SdosSheetController() {
     function fadingAnimation(d, visited_keys, callback) {
         console.log(visited_keys);
         setTimeout(function () {
+            console.log("sdsdsdsd",d);
             d3.select("#delete_text").attr("value", "Deleting old key");
             d.operation = "fade";
             update(d);
+            if(d.type == "object"){
+                var parent = d.parent;
+                parent.children = null;
+                update(parent);
+            }
             // remove next node from visited nodes
             if (visited_keys.length > 0) {
                 if (visited_keys[0].type != "object") {
-                    callback(d, visited_keys);
+                    callback(d, visited_keys, fadingAnimation);
                 }
                 else {
                     var next = visited_keys.shift();
                     fadingAnimation(next, visited_keys);
                     // should not have the case of trying call the callback from this point, since order
+                }
+            }else if(visited_keys.length == 0 && callback){
+                if(d.type != "key_object" && d.type != "object") {
+                    callback(d, visited_keys);
                 }
             }
         }, 750);
@@ -432,7 +439,7 @@ function SdosSheetController() {
     }
 
     function changingKeysAnimation(d, visited_keys) {
-        console.log(d);
+        console.log("changing",d);
         console.log(visited_keys.reverse());
         var list = visited_keys;
         fadingAnimation(d, list, newAnimation);
@@ -443,22 +450,44 @@ function SdosSheetController() {
         setTimeout(function () {
             if (d.parent) {
                 d3.select("#delete_text").attr("value", "Selecting path from leaf to root");
-                d.parent.operation = "selecting";
-                update(d.parent);
+                d.operation = "selecting";
+                update(d);
                 visited_keys.push(d);
                 selectingAnimation(d.parent, visited_keys, callback);
             }
             else {
-                callback(d, visited_keys);
+                if(callback)
+                    callback(d, visited_keys);
+                else{
+                    // case when the step animation called, need put key master in the array
+                    var last = visited_keys.pop();
+                    visited_keys.push(last);
+                    visited_keys.push(last.parent);
+                }
             }
         }, 750);
 
     }
 
-    /*
-    * End animations functions
-    *
-    * */
+    var step = 0;
+    var keys = [];
+
+    function stepAnimation(d){
+
+        if(step == 0){
+            // selecting step
+            selectingAnimation(d,keys);
+            step = 1;
+
+        }
+        else{
+            if(keys != []){
+                var node = keys.pop();
+                console.log("steo",d);
+                changingKeysAnimation(node, []);
+            }
+        }
+    }
 
     function deleteAnimation(d) {
         var auto = d3.select("#autoAnimation").property("checked");
@@ -469,9 +498,17 @@ function SdosSheetController() {
             }
             else{
                 // step by step
+                console.log("step");
+                stepAnimation(d);
+
             }
         }
     }
+
+    /*
+    * End animations functions
+    *
+    * */
 
 
     /*
@@ -570,6 +607,8 @@ function SdosSheetController() {
             .attr("height", "37px");
 
 
+
+
         // the label of the node
         nodeEnter.append("text")
             .attr("x", 23)
@@ -592,11 +631,16 @@ function SdosSheetController() {
         // the new style after the transition
         nodeUpdate.select("image")
             .attr("xlink:href", function (d) {
+                if((d.type == "object" || d.type == "key_object") && d.operation == "selecting"){
+                    return d.type == "object" ? icon_file_delete : icon_key_delete;
+                }
                 if(d.type == "object" && d.parent.operation == "selected")
                     return icon_selectedfile;
                 return d.operation == "new" ? icon_pluskey : (d.operation == "fade" ? "" : ( d.type == "key" ? icon_key : ( d.type == "master" ? icon_masterkey : ( d.type == "object" ? icon_file :
                     (d.type == "key_object" ? icon_object : (d.type == "up" || d.type == "down" ? icon_pluskey : icon_plusfile) )))));
             });
+
+
         nodeUpdate.select("rect")
             .attr("width", function (d) {
                 return (d.type == "key" || d.type == "key_object") ? 40 : null
