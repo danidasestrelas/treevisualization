@@ -1,0 +1,32 @@
+{
+	"partitionSize": 2,
+	"levels": 3,
+	"usedPartitions": [
+		0,
+		1,
+		2,
+		3,
+		4,
+		5,
+		6
+	],
+	"objectMapping": {
+		"3": [
+			{"slot": 1, "objName": "file1"},
+			{"slot": 2, "objName": "file2"}
+		],
+		"4": [
+			{"slot": 1, "objName": "file3"},
+			{"slot": 2, "objName": "file4"}
+		],
+		"5": [
+			{"slot": 1, "objName": "file5"},
+			{"slot": 2, "objName": "file6"}
+		],
+		"6": [
+			{"slot": 1, "objName": "file7"},
+			{"slot": 2, "objName": "file8"}
+		]
+
+	}
+}
