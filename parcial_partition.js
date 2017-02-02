@@ -6,7 +6,7 @@ var dataP;
 
 
 function SdosSheetController() {
-    var jsonFile = "minitree.json"; //"partree.json";
+    var jsonFile = "partree.json";
 
     var icon_file = "/angular/icons/d3/plusfile.svg";
     var icon_key = "/angular/icons/d3/key.svg";
@@ -68,7 +68,7 @@ function SdosSheetController() {
 
     function renderTree(data) {
         console.log("rendering: " + data);
-        dataset = jsonToFlare(data);
+        dataset = jsonToPartitions(data); //jsonToFlare(data);
         root = dataset[0];
         root.x0 = height / 2;
         root.y0 = 0;
@@ -520,9 +520,14 @@ function SdosSheetController() {
     function update(source) {
 
         // Compute the new tree layout.
-        var nodes = tree.nodes(root).reverse(),  // list of the nodes objects, descending
-            links = tree.links(nodes);
-console.log(links);
+        var nodes = tree.nodes(root).reverse();  // list of the nodes objects, descending
+console.log(nodes);
+
+
+
+
+        var links = tree.links(nodes);
+//console.log(links);
         // Normalize for fixed-depth.
         nodes.forEach(function (d) {
             d.y = d.depth * 75;
@@ -584,7 +589,7 @@ console.log(links);
         }
 
 
-        nodeEnter.append("rect")
+        /*nodeEnter.append("rect")
             .attr("width", function (d) {
                 return (d.type == "key" || d.type == "key_object") ? 40 : null
             })
@@ -597,7 +602,7 @@ console.log(links);
             .attr("x", "-10px")
             .attr("y", "-24px")
             .style("fill-opacity", 1e-6);
-
+*/
 
         nodeEnter.append("svg:image")
             .attr("xlink:href", function (d) {
@@ -644,7 +649,7 @@ console.log(links);
             });
 
 
-        nodeUpdate.select("rect")
+        /*nodeUpdate.select("rect")
             .attr("width", function (d) {
                 return (d.type == "key" || d.type == "key_object") ? 40 : null
             })
@@ -664,7 +669,7 @@ console.log(links);
             .style("stroke", function (d) {
                 return d.operation == "selected" ? "#DA6B03" : ( d.operation == "selecting"? "#B83737" :"steelblue")
             })
-        ;
+        ;*/
 
 
         nodeUpdate.select("text")

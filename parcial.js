@@ -2,7 +2,7 @@
  * */
 
 'use strict';
-
+var svg;
 
 function SdosSheetController() {
 
@@ -10,11 +10,13 @@ function SdosSheetController() {
 
     var icon_file = "/angular/icons/d3/plusfile.svg";
     var icon_key = "/angular/icons/d3/key.svg";
+    var icon_key_closed = "/angular/icons/d3/key_closed.svg";
     var icon_masterkey = "/angular/icons/d3/masterkey.svg";
     var icon_plusfile = "/angular/icons/d3/pluskey_object.svg";
     var icon_pluskey = "/angular/icons/d3/pluskey.svg";
     var icon_object = "/angular/icons/d3/key_object.svg";
     var icon_selectedfile = "/angular/icons/d3/selected_file.svg";
+    var icon_selectedkey = "/angular/icons/d3/selected_key.svg";
     var icon_key_delete = "/angular/icons/d3/key_object_delete.svg";
     var icon_file_delete = "/angular/icons/d3/plusfile_delete.svg";
 
@@ -46,7 +48,7 @@ function SdosSheetController() {
 
     var zoom = d3.behavior.zoom().scaleExtent([0, 1]).translate([120, 20]).on("zoom", zoomed);
 
-    var svg;
+
 
 
     /*
@@ -517,14 +519,19 @@ function SdosSheetController() {
     function update(source) {
 
         // Compute the new tree layout.
-        var nodes = tree.nodes(root).reverse(),  // list of the nodes objects, descending
-            links = tree.links(nodes);
-
+        var nodes = tree.nodes(root).reverse(); // list of the nodes objects, descending
+        var links = tree.links(nodes);
+console.log(nodes);
         // Normalize for fixed-depth.
         nodes.forEach(function (d) {
-            d.y = d.depth * 75;
+            d.y = d.depth * 100;
         }); // the distance between nodes
 
+
+        tree.separation(separation);
+        function separation(a, b) {
+             return a.parent == b.parent ? 0.5 : 0.6;
+        }
 
         // Update the nodes…
         var node = svg.selectAll("g.node")
@@ -556,7 +563,7 @@ function SdosSheetController() {
                 else return click(d)
             });
 
-        // append circles and rectangles to the nodes
+        // append svg and rectangles to the nodes
 
         function rectHeight(d) {
 
@@ -577,7 +584,7 @@ function SdosSheetController() {
                 else final = inicial + 60;
             }
 
-            return final - inicial;
+            return final - inicial + 2;
         }
 
 
@@ -598,20 +605,19 @@ function SdosSheetController() {
 
         nodeEnter.append("svg:image")
             .attr("xlink:href", function (d) {
-                return d.type == "key" ? icon_key : ( d.type == "master" ? icon_masterkey : ( d.type == "object" ? icon_file :
+                return d.type == "key" ? (d._children ? icon_key_closed :icon_key) : ( d.type == "master" ? icon_masterkey : ( d.type == "object" ? icon_file :
                     (d.type == "key_object" ? icon_object : (d.type == "up" || d.type == "down" ? icon_pluskey : icon_plusfile) )));
             })
-            .attr("x", "-9px")
+            .attr("x", "-19px")
             .attr("y", "-24px")
             .attr("width", "37px")
             .attr("height", "37px");
 
 
 
-
         // the label of the node
         nodeEnter.append("text")
-            .attr("x", 23)
+            .attr("x", 13)
             .attr("dy", "1.5em")
             .attr("text-anchor", function (d) {
                 return d.children || d._children ? "end" : "start";
@@ -625,7 +631,7 @@ function SdosSheetController() {
         var nodeUpdate = node.transition()
             .duration(duration)
             .attr("transform", function (d) {
-                return "translate(" + d.y + "," + d.x + ")";
+                return "translate(" + (d.y) + "," + d.x + ")";
             });
 
         // the new style after the transition
@@ -636,8 +642,8 @@ function SdosSheetController() {
                 }
                 if(d.type == "object" && d.parent.operation == "selected")
                     return icon_selectedfile;
-                return d.operation == "new" ? icon_pluskey : (d.operation == "fade" ? "" : ( d.type == "key" ? icon_key : ( d.type == "master" ? icon_masterkey : ( d.type == "object" ? icon_file :
-                    (d.type == "key_object" ? icon_object : (d.type == "up" || d.type == "down" ? icon_pluskey : icon_plusfile) )))));
+                return d.operation == "selected" ? icon_selectedkey :(d.operation == "new" ? icon_pluskey : (d.operation == "fade" ? "" : ( d.type == "key" ? (d._children ? icon_key_closed :icon_key) : ( d.type == "master" ? icon_masterkey : ( d.type == "object" ? icon_file :
+                    (d.type == "key_object" ? icon_object : (d.type == "up" || d.type == "down" ? icon_pluskey : icon_plusfile) ))))));
             });
 
 
@@ -651,15 +657,17 @@ function SdosSheetController() {
             .attr("class", function (d) {
                 return (d.type == "key") ? "key" : "object";
             })
-            .attr("x", "-10px")
+            .attr("x", "-20px")
             .attr("y", "-24px")
             .style("fill", function (d) {
-                return d._children ? (d.type == "key" ? "lightsteelblue" : "#c3c3c3" ) : "#fff"
+                return "lightsteelblue";
+                //return d._children ? (d.type == "key" ? "lightsteelblue" : "#c3c3c3" ) : "#fff"
             })
             .style("fill-opacity", 1)
             //TODO IDEA 1
             .style("stroke", function (d) {
-                return d.operation == "selected" ? "#DA6B03" : ( d.operation == "selecting"? "#B83737" :"steelblue")
+                return "none";
+                //return d.operation == "selected" ? "#DA6B03" : ( d.operation == "selecting"? "#B83737" :"steelblue")
             })
         ;
 
@@ -692,8 +700,18 @@ function SdosSheetController() {
                 return d.target.id;
             });
 
+        console.log(link);
+
         // Enter any new links at the parent's previous position.
         link.enter().insert("path", "g")
+            /*.filter(function (d) {
+            console.log(d);
+            if (d.target.type != "down" && d.target.type != "up"){
+                return true;
+            }
+            else this.remove();
+
+        })*/
             .attr("class", "link")
             .attr("d", function () {
                 var o = {x: source.x0, y: source.y0};
@@ -881,7 +899,7 @@ function SdosSheetController() {
                          * */
                         children[i] = {
                             name: objects[i].slot,
-                            "children": [{name: objects[i].objName, "type": "object"}],
+                            "_children": [{name: objects[i].objName, "type": "object"}],
                             "type": "key_object"
                         };
                     }
@@ -891,7 +909,7 @@ function SdosSheetController() {
                          * */
                         siblings[i - 5] = {
                             name: objects[i].slot,
-                            "children": [{name: objects[i].objName, "type": "object"}],
+                            "_children": [{name: objects[i].objName, "type": "object"}],
                             "type": "key_object"
                         };
                     }
@@ -905,7 +923,7 @@ function SdosSheetController() {
                     for (i = 0; i < objects.length; i++) {
                         children[i] = {
                             name: objects[i].slot,
-                            "children": [{name: objects[i].objName, "type": "object"}],
+                            "_children": [{name: objects[i].objName, "type": "object"}],
                             "type": "key_object"
                         };
                     }
