@@ -331,9 +331,16 @@ function SdosSheetController() {
                         inChildren = 1;
                         next = d;
                     }
-                    else if (d.type == "key_object" && d.children[0] && d.children[0].name == object) {
-                        d.operation = "selected";
-                        inChildren = 1;
+                    else if (d.type == "key_object") {
+
+                        if(d.children != null) {
+                            changeChildren(d);
+                        }
+                        if(d._children[0] && d._children[0].name == object) {
+                            d.operation = "selected";
+                            changeChildren(d);
+                            inChildren = 1;
+                        }
                     }
 
 
@@ -382,6 +389,17 @@ function SdosSheetController() {
                     changeChildren(d);
                 }
             }
+            /*else{
+                console.log(d.name);
+                 if (d.children != null && openNodes.indexOf(d.name) < 0) {
+                    changeChildren(d);
+                    //console.log(d);
+                }
+                else if (d._children != null && openNodes.indexOf(d.name) > -1) {
+                     console.log(d.name);
+                    changeChildren(d);
+                }
+            }*/
         });
     }
     /*
