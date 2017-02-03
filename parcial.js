@@ -3,6 +3,9 @@
 
 'use strict';
 var svg;
+var root;
+var mappging = [];
+ var selected_object = null;
 
 function SdosSheetController() {
 
@@ -27,7 +30,7 @@ function SdosSheetController() {
 
     var animation = 0;
 
-    var selected_object = null;
+
 
 
     var margin = {top: 20, right: 120, bottom: 20, left: 120},
@@ -35,8 +38,8 @@ function SdosSheetController() {
         height = 800 - margin.top - margin.bottom;
 
     var i = 0,
-        duration = 750,
-        root;
+        duration = 750
+        ;
 
     var tree = d3.layout.tree()
         .size([height, width]);
@@ -68,6 +71,36 @@ function SdosSheetController() {
         }
     });
 
+    function objMapping(root) {
+
+        if(root.type == "object") {
+            if(root.parent != null)
+                mappging.push(root);
+        }
+        else{
+            if(root.children){
+                root.children.forEach(function (d) {
+                    objMapping(d);
+                });
+            }
+            if(root._children){
+                 root._children.forEach(function (d) {
+                    objMapping(d);
+                });
+            }
+            if(root.siblings_up){
+                 root.siblings_up.forEach(function (d) {
+                    objMapping(d);
+                });
+            }
+            if(root.siblings_down){
+                 root.siblings_down.forEach(function (d) {
+                    objMapping(d);
+                });
+            }
+        }
+    }
+
     function renderTree(data) {
         console.log("rendering: " + data);
         dataset = jsonToFlare(data);
@@ -95,7 +128,6 @@ function SdosSheetController() {
         inicialTree = open;
         closeTree(root, open);
         update(root);
-
 
         d3.select("#cascadeRendering").append("input")
             .attr("type", "checkbox")
@@ -283,6 +315,9 @@ function SdosSheetController() {
         rightChildren(source, path, aux[1]);
         closeTree(source, path);
         update(root);
+        objMapping(root);
+
+        selected_object = mappging[0];
     }
 
     function leafPath(value, ps, path) {
@@ -569,6 +604,8 @@ console.log(nodes);
                 else if (d.type == "up" || d.type == "object_up")
                     return clickUp(d);
                 else if (d.type == "object") {
+                    console.log("clicked!!");
+                    console.log(d);
                     selected_object = d;
                     d3.select("#valueText")
                         .property("value",
