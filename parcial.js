@@ -296,11 +296,13 @@ function SdosSheetController() {
     * */
     function loadNode(source, text, data) {
         var path = [];
-        var aux = text.split("|");
-        leafPath(parseInt(aux[0]), data.partitionSize, path);
-        rightChildren(source, path, aux[1]);
+        var aux = text;
+        
+
+        multipleLeafsPath(source,[aux], data.partitionSize, path);
         closeTree(source, path);
         update(root);
+        selected_object = mappging[0];
     }
 
     /* text is a string in the format "parent|object_name"
@@ -327,6 +329,7 @@ function SdosSheetController() {
         var objects = [];
         var open;
 
+        //list = ["4369|0", "4369|2", "4369|9", "4373|66"];
 
         list.forEach(function (d) {
             console.log(d);
