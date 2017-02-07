@@ -309,15 +309,80 @@ function SdosSheetController() {
      * */
     function searchNode(source, text, data) {
         var path = [];
-        var aux = text.property("value").toString().split("|");
+        var aux = text.property("value").toString();
 
-        leafPath(parseInt(aux[0]), data.partitionSize, path);
-        rightChildren(source, path, aux[1]);
+        //leafPath(parseInt(aux[0]), data.partitionSize, path);
+        multipleLeafsPath(source,[aux], data.partitionSize, path);
+
+
         closeTree(source, path);
         update(root);
         objMapping(root);
 
         selected_object = mappging[0];
+    }
+
+    function multipleLeafsPath(source,list, ps, path) {
+        var multiplePath = [];
+        var objects = [];
+        var open;
+
+
+        list.forEach(function (d) {
+            console.log(d);
+            var aux = d.split("|");
+            leafPath(parseInt(aux[0]), ps, path);
+            multiplePath = multiplePath.concat(path.filter(function (item) {
+                return multiplePath.indexOf(item) < 0;
+            }));
+            objects.push(aux[1]);
+
+        });
+
+        //select all nodes
+        open = rightChildren(source, multiplePath, objects);
+
+        console.log(multiplePath);
+        console.log(objects);
+
+        if(objects.length == 1){ //Search one just object
+
+            console.log(open);
+
+            var found = 0;
+            var down = 1;
+            while(!found) {
+                //look if the object is in children
+                open[1].children.forEach(function (d) {
+                    if (d.name == open[0].name) {
+                        found = 1;
+                    }
+
+                });
+
+                if(!found){
+                    //go siblings down
+                    if (down) {
+                        siblingsDown(open[1].children[open[1].children.length - 1]);
+                        if (open[1].siblings_down.length == 0) {
+                            down = 0;
+                        }
+                    }
+                    else {
+                        siblingsUp(open[1].children[0]);
+                        if (open[1].siblings_up.length == 0) {
+                            down = 1;
+                        }
+                    }
+                }
+            }
+        }
+
+
+    }
+
+    function openChildren(source, path, object){
+
     }
 
     function leafPath(value, ps, path) {
@@ -329,19 +394,21 @@ function SdosSheetController() {
          * */
         if (number > 0) {
             var parent = parseInt((number - 1) / ps);
-            path.push(number);
+
+            if(path.indexOf(number) < 0)
+                path.push(number);
             leafPath(parent, ps, path);
         } else {
-            path.push(0);
+            if(path.indexOf(0) < 0)
+                path.push(0);
         }
     }
 
     function rightChildren(source, openNodes, object) {
         /* Go through all children
          * */
-        var inChildren = 0;
         var next = null;
-        var down = 1;
+        var open = null;
 
         /* Testes if the node is not closed, then open it
          * */
@@ -351,56 +418,63 @@ function SdosSheetController() {
 
         }
 
-        if (source.children != null) {
-            while (!inChildren) {
+        // take all children to be selected
+        var uz = [];
+        if(source.children != null)
+            uz = uz.concat(source.children);
+        if(source.siblings_down != null)
+            uz = uz.concat(source.siblings_down);
+        if(source.siblings_up != null)
+            uz = uz.concat(source.siblings_up);
 
-                source.children.forEach(function (d) {
 
-                    /* See if this node is in the OpenNodes list
-                     *  if it is and it is a "key" type, goes to the next node
-                     *  if it is a "key_object" type
-                     *  */
-                    d.operation = "none";
-                    if (openNodes.indexOf(d.name) > -1 && (d.type == "key")) {
+        if (uz != null) {
+
+            uz.forEach(function (d) {
+
+                /* See if this node is in the OpenNodes list
+                 *  if it is and it is a "key" type, goes to the next node
+                 *  if it is a "key_object" type
+                 *  */
+
+                /*
+                * NOTE: assume that this function will be use to mark all nodes
+                * once and will be not another "search"
+                * if it is, probably will be in the case of "else"
+                * */
+
+                if (openNodes.indexOf(d.name) > -1 && (d.type == "key")) {
+                    d.operation = "selected";
+                    next = d;
+
+                    open = rightChildren(next, openNodes, object);
+
+                }
+                else if (d.type == "key_object") {
+                    if(d.children != null) {
+                        changeChildren(d);
+                    }
+
+                    if(d._children[0] &&  object.indexOf(d._children[0].name) > -1) {
                         d.operation = "selected";
-                        inChildren = 1;
-                        next = d;
+                        changeChildren(d);
+                        console.log("dhufh");
+
+                        open = [d, source];
                     }
-                    else if (d.type == "key_object") {
-
-                        if(d.children != null) {
-                            changeChildren(d);
-                        }
-                        if(d._children[0] && d._children[0].name == object) {
-                            d.operation = "selected";
-                            changeChildren(d);
-                            inChildren = 1;
-                        }
-                    }
-
-
-                });
-
-                if (!inChildren) {
-                    if (down) {
-                        siblingsDown(source.children[source.children.length - 1]);
-                        if (source.siblings_down.length == 0) {
-                            down = 0;
-                        }
-                    }
-                    else {
-                        siblingsUp(source.children[0]);
-                        if (source.siblings_up.length == 0) {
-                            down = 1;
-                        }
+                    else{
+                         d.operation = "none";
                     }
                 }
-            }
+                else{
+                    d.operation = "none";
+                }
+
+
+            });
         }
 
-        if (next != null) {
-            rightChildren(next, openNodes, object);
-        }
+        return open; //in case of one
 
     }
 
@@ -424,17 +498,6 @@ function SdosSheetController() {
                     changeChildren(d);
                 }
             }
-            /*else{
-                console.log(d.name);
-                 if (d.children != null && openNodes.indexOf(d.name) < 0) {
-                    changeChildren(d);
-                    //console.log(d);
-                }
-                else if (d._children != null && openNodes.indexOf(d.name) > -1) {
-                     console.log(d.name);
-                    changeChildren(d);
-                }
-            }*/
         });
     }
     /*
@@ -842,7 +905,7 @@ console.log(nodes);
     }
 
     function siblingsUp(d) {
-
+    console.log("here:"+d);
         // take the new children
         var newChildren = d.parent.siblings_up.splice(d.parent.siblings_up.length - 5, 5);
 
