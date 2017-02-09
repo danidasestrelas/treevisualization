@@ -71,31 +71,33 @@ function SdosSheetController() {
         }
     });
 
-    function objMapping(root) {
+    function objMapping(root, deletableObjejects) {
 
         if(root.type == "object") {
             if(root.parent != null)
-                mappging.push(root);
+                // TODO testar se o objeto esta no selected_objects e soh assim adicionar
+                if(deletableObjejects.indexOf(root.name) > -1)
+                    mappging.push(root);
         }
         else{
             if(root.children){
                 root.children.forEach(function (d) {
-                    objMapping(d);
+                    objMapping(d, deletableObjejects);
                 });
             }
             if(root._children){
                  root._children.forEach(function (d) {
-                    objMapping(d);
+                    objMapping(d, deletableObjejects);
                 });
             }
             if(root.siblings_up){
                  root.siblings_up.forEach(function (d) {
-                    objMapping(d);
+                    objMapping(d, deletableObjejects);
                 });
             }
             if(root.siblings_down){
                  root.siblings_down.forEach(function (d) {
-                    objMapping(d);
+                    objMapping(d, deletableObjejects);
                 });
             }
         }
@@ -302,16 +304,17 @@ function SdosSheetController() {
     * */
     function loadNode(source, objects, data) {
         var path = [];
-        var aux = objects; //text is now an array of strings
-
-        console.log(objects);
+        var aux;
 
         aux = searchParent(objects, data.objectMapping);
 
         multipleLeafsPath(source,aux, data.partitionSize, path);
         closeTree(source, path);
         update(root);
-        selected_object = mappging[0];
+        objMapping(root, data.sdos_batch_delete_log);
+        selected_object = mappging;
+
+        console.log(mappging);
     }
 
     function searchParent(objects, objMapping){
@@ -319,9 +322,7 @@ function SdosSheetController() {
         var i = 0;
 
         for(var parent in objMapping){
-            console.log(parent);
             objMapping[parent].forEach(function (d) {
-                console.log(d.objName);
 
                 if(objects.indexOf(d.objName) > -1){
                     parentsChildren[i] = parent.toString() + "|" + d.objName.toString();
@@ -345,9 +346,11 @@ function SdosSheetController() {
         multipleLeafsPath(source,[aux], data.partitionSize, path);
         closeTree(source, path);
         update(root);
-        objMapping(root);
+        objMapping(root, data.sdos_batch_delete_log);
 
-        selected_object = mappging[0];
+        selected_object = mappging;
+
+
     }
 
     function multipleLeafsPath(source,list, ps, path) {
@@ -662,7 +665,7 @@ function SdosSheetController() {
         // Compute the new tree layout.
         var nodes = tree.nodes(root).reverse(); // list of the nodes objects, descending
         var links = tree.links(nodes);
-console.log(nodes);
+
         // Normalize for fixed-depth.
         nodes.forEach(function (d) {
             d.y = d.depth * 100;
@@ -671,7 +674,7 @@ console.log(nodes);
 
         tree.separation(separation);
         function separation(a, b) {
-             return a.parent == b.parent ? 0.5 : 0.6;
+             return a.parent == b.parent ? 0.8 : 2;
         }
 
         // Update the nodes…
