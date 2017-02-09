@@ -1,32 +1,50 @@
 {
-	"partitionSize": 2,
+	"partitionSize": 4,
 	"levels": 3,
-	"usedPartitions": [
-		0,
-		1,
-		2,
-		3,
-		4,
-		5,
-		6
-	],
-	"objectMapping": {
-		"3": [
-			{"slot": 1, "objName": "file1"},
-			{"slot": 2, "objName": "file2"}
-		],
-		"4": [
-			{"slot": 1, "objName": "file3"},
-			{"slot": 2, "objName": "file4"}
-		],
-		"5": [
-			{"slot": 1, "objName": "file5"},
-			{"slot": 2, "objName": "file6"}
-		],
-		"6": [
-			{"slot": 1, "objName": "file7"},
-			{"slot": 2, "objName": "file8"}
-		]
+	"usedPartitions": [0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
 
-	}
+	"sdos_batch_delete_log": ["1252794723399.jpg", "1252644459095.jpg", "1243774212361.jpg",
+      "1252644528727.jpg", "CM9kQ.jpg", "3D-sunset.jpg"],
+
+	"objectMapping": {"5": [{"slot": 3, "objName": "3D-sunset.jpg"}, {"slot": 2, "objName":
+"td0oU.jpg"}, {"slot": 0, "objName": "symetria800.jpg"}, {"slot": 1,
+"objName": "symetria.jpg"}], "6": [{"slot": 2, "objName":
+"RubikOriginal1600.jpg"}, {"slot": 0, "objName":
+"tiny_blast_of_red.jpg"}, {"slot": 1, "objName": "alien.jpg"}, {"slot":
+3, "objName": "RealNirvana.jpg"}], "7": [{"slot": 0, "objName":
+"1252794723399.jpg"}, {"slot": 2, "objName": "cosmicdawn.jpg"}, {"slot":
+3, "objName": "1243774212361.jpg"}, {"slot": 1, "objName":
+"bluehorizonoriginal.jpg"}], "8": [{"slot": 3, "objName":
+"aliensI1024X768.jpg"}, {"slot": 0, "objName":
+"winwall7057_14large.jpg"}, {"slot": 1, "objName": "PftzG.jpg"},
+{"slot": 2, "objName": "1252644528727.jpg"}], "9": [{"slot": 0,
+"objName": "BicolorMode.jpg"}, {"slot": 1, "objName": "stone_bird.jpg"},
+{"slot": 3, "objName": "ALIENS_Background_1024X768.gif"}, {"slot": 2,
+"objName": "ladybugs.jpg"}], "10": [{"slot": 1, "objName":
+"shuttle-clouds.jpg"}, {"slot": 0, "objName": "1252644459095.jpg"},
+{"slot": 2, "objName": "Mac_OS_X_Leopard_Space.jpg"}, {"slot": 3,
+"objName": "winwall7057_17large.jpg"}], "11": [{"slot": 2, "objName":
+"Dreamflow_by_Zueuk.jpg"}, {"slot": 3, "objName": "cancer.jpg"},
+{"slot": 0, "objName": "Omika.jpg"}, {"slot": 1, "objName":
+"star.jpg"}], "12": [{"slot": 3, "objName": "flowers_and_leaves.jpg"},
+{"slot": 1, "objName":
+"ComputerDesktopWallpapersCollection885_089.jpg"}, {"slot": 0,
+"objName": "ViaRealized2.jpg"}, {"slot": 2, "objName":
+"ComputerDesktopWallpapersCollection885_048.jpg"}], "13": [{"slot": 1,
+"objName": "confluence.jpg"}, {"slot": 0, "objName":
+"ComputerDesktopWallpapersCollection885_051.jpg"}, {"slot": 2,
+"objName": "ComputerDesktopWallpapersCollection885_065.jpg"}, {"slot":
+3, "objName": "glassdeb.jpg"}], "14": [{"slot": 0, "objName":
+"ESCAPE_1920x1200.jpg"}, {"slot": 1, "objName":
+"ComputerDesktopWallpapersCollection885_042.jpg"}, {"slot": 3,
+"objName": "Horizon___Widescreen_Wallpaper_by_hameed.jpg"}, {"slot": 2,
+"objName": "AWESOME.jpg"}], "15": [{"slot": 3, "objName": "CM9kQ.jpg"},
+{"slot": 1, "objName":
+"ComputerDesktopWallpapersCollection885_001.jpg"}, {"slot": 0,
+"objName": "brothers.jpg"}, {"slot": 2, "objName":
+"somethingblue.jpg"}], "16": [{"slot": 1, "objName": "sps_1.jpg"},
+{"slot": 2, "objName":
+"ComputerDesktopWallpapersCollection885_036.jpg"}, {"slot": 0,
+"objName": "ohmgd.jpg"}]}
+
 }

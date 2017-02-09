@@ -96,7 +96,12 @@ function SdosSheetController() {
         closeTree(root, open);
         update(root);
 
-
+        console.log("shgdjsd", dataset.sdos_batch_delete_log);
+        console.log("shgdjsd", dataset.sdos_batch_delete_log);
+        if(dataset.sdos_batch_delete_log != null){
+            console.log("SDNLSDNSD");
+            loadNode(root, dataset.sdos_batch_delete_log, dataset);
+        }
 
         d3.select("#cascadeRendering").append("input")
             .attr("type", "checkbox")
@@ -264,6 +269,7 @@ function SdosSheetController() {
     *
     * */
     function loadNode(source, text, data) {
+        console.log(text);
         var path = [];
         var aux = text.split("|");
         leafPath(parseInt(aux[0]), data.partitionSize, path);

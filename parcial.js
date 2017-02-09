@@ -9,7 +9,7 @@ var mappging = [];
 
 function SdosSheetController() {
 
-    var jsonFile = "minitree.json";
+    var jsonFile = "partree.json";
 
     var icon_file = "/angular/icons/d3/plusfile.svg";
     var icon_key = "/angular/icons/d3/key.svg";
@@ -128,6 +128,12 @@ function SdosSheetController() {
         inicialTree = open;
         closeTree(root, open);
         update(root);
+
+
+        if(data.sdos_batch_delete_log != null){
+            console.log("sdds", data.sdos_batch_delete_log);
+            loadNode(root, data.sdos_batch_delete_log, data);
+        }
 
         d3.select("#cascadeRendering").append("input")
             .attr("type", "checkbox")
@@ -294,15 +300,38 @@ function SdosSheetController() {
     * Selecting path and objects functions
     *
     * */
-    function loadNode(source, text, data) {
+    function loadNode(source, objects, data) {
         var path = [];
-        var aux = text;
-        
+        var aux = objects; //text is now an array of strings
 
-        multipleLeafsPath(source,[aux], data.partitionSize, path);
+        console.log(objects);
+
+        aux = searchParent(objects, data.objectMapping);
+
+        multipleLeafsPath(source,aux, data.partitionSize, path);
         closeTree(source, path);
         update(root);
         selected_object = mappging[0];
+    }
+
+    function searchParent(objects, objMapping){
+        var parentsChildren = [];
+        var i = 0;
+
+        for(var parent in objMapping){
+            console.log(parent);
+            objMapping[parent].forEach(function (d) {
+                console.log(d.objName);
+
+                if(objects.indexOf(d.objName) > -1){
+                    parentsChildren[i] = parent.toString() + "|" + d.objName.toString();
+                    i++;
+                }
+            })
+        }
+
+        return parentsChildren;
+
     }
 
     /* text is a string in the format "parent|object_name"
@@ -313,10 +342,7 @@ function SdosSheetController() {
         var path = [];
         var aux = text.property("value").toString();
 
-        //leafPath(parseInt(aux[0]), data.partitionSize, path);
         multipleLeafsPath(source,[aux], data.partitionSize, path);
-
-
         closeTree(source, path);
         update(root);
         objMapping(root);
@@ -381,10 +407,6 @@ function SdosSheetController() {
             }
         }
 
-
-    }
-
-    function openChildren(source, path, object){
 
     }
 
