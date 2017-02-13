@@ -75,7 +75,6 @@ function SdosSheetController() {
 
         if(root.type == "object") {
             if(root.parent != null)
-                // TODO testar se o objeto esta no selected_objects e soh assim adicionar
                 if(deletableObjejects.indexOf(root.name) > -1)
                     mappging.push(root);
         }
@@ -314,7 +313,7 @@ function SdosSheetController() {
         objMapping(root, data.sdos_batch_delete_log);
         selected_object = mappging;
 
-        console.log(mappging);
+        //console.log(mappging);
     }
 
     function searchParent(objects, objMapping){
@@ -636,6 +635,11 @@ function SdosSheetController() {
     }
 
     function deleteAnimation(d) {
+
+        // TODO Now "d" is an array of the objects to be delete
+
+        console.log(d);
+
         var auto = d3.select("#autoAnimation").property("checked");
         if(!animation) {
             if(auto) {
@@ -694,18 +698,6 @@ function SdosSheetController() {
                     return clickDown(d);
                 else if (d.type == "up" || d.type == "object_up")
                     return clickUp(d);
-                else if (d.type == "object") {
-                    console.log("clicked!!");
-                    console.log(d);
-                    selected_object = d;
-                    d3.select("#valueText")
-                        .property("value",
-                            d.parent.parent.name.toString()+"|"+d.name
-                        )
-                        .attr("selected", true);
-
-                    return loadNode(root, d.parent.parent.name.toString() + "|" + d.name.toString(), dataP);
-                }
                 else return click(d)
             });
 
