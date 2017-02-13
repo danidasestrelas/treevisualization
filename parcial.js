@@ -103,7 +103,6 @@ function SdosSheetController() {
     }
 
     function renderTree(data) {
-        console.log("rendering: " + data);
         dataset = jsonToFlare(data);
         root = dataset[0];
         root.x0 = height / 2;
@@ -132,7 +131,6 @@ function SdosSheetController() {
 
 
         if(data.sdos_batch_delete_log != null){
-            console.log("sdds", data.sdos_batch_delete_log);
             loadNode(root, data.sdos_batch_delete_log, data);
         }
 
@@ -148,7 +146,10 @@ function SdosSheetController() {
             .attr("type", "button")
             .attr("value",  "next")
             .on("click", function (){
-                stepAnimation(selected_object);
+                if(selected_object.length == 1)
+                    stepAnimation(selected_object);
+                else if(selected_object.length > 1)
+                    stepAnimationMultiple(selected_object, 1);
             });
 
          d3.select("#cascadeRendering").append("input")
@@ -281,7 +282,6 @@ function SdosSheetController() {
     }
 
     function buttonClick() {
-        console.log(this.id);
         if (this.id == 'zoom_in' || this.id == 'zoom_out') {
 
             return zoomClick(this.id);
@@ -360,7 +360,6 @@ function SdosSheetController() {
         //list = ["4369|0", "4369|2", "4369|9", "4373|66"];
 
         list.forEach(function (d) {
-            console.log(d);
             var aux = d.split("|");
             leafPath(parseInt(aux[0]), ps, path);
             multiplePath = multiplePath.concat(path.filter(function (item) {
@@ -373,12 +372,8 @@ function SdosSheetController() {
         //select all nodes
         open = rightChildren(source, multiplePath, objects);
 
-        console.log(multiplePath);
-        console.log(objects);
 
         if(objects.length == 1){ //Search one just object
-
-            console.log(open);
 
             var found = 0;
             var down = 1;
@@ -485,7 +480,6 @@ function SdosSheetController() {
                     if(d._children[0] &&  object.indexOf(d._children[0].name) > -1) {
                         d.operation = "selected";
                         changeChildren(d);
-                        console.log("dhufh");
 
                         open = [d, source];
                     }
@@ -553,9 +547,7 @@ function SdosSheetController() {
     }
 
     function fadingAnimation(d, visited_keys, callback) {
-        console.log(visited_keys);
         setTimeout(function () {
-            console.log("sdsdsdsd",d);
             d3.select("#delete_text").attr("value", "Deleting old key");
             d.operation = "fade";
             update(d);
@@ -571,7 +563,7 @@ function SdosSheetController() {
                 }
                 else {
                     var next = visited_keys.shift();
-                    fadingAnimation(next, visited_keys);
+                    fadingAnimation(next, visited_keys, newAnimation);
                     // should not have the case of trying call the callback from this point, since order
                 }
             }else if(visited_keys.length == 0 && callback){
@@ -585,7 +577,7 @@ function SdosSheetController() {
 
     function changingKeysAnimation(d, visited_keys) {
         console.log("changing",d);
-        console.log(visited_keys.reverse());
+        visited_keys.reverse();
         var list = visited_keys;
         fadingAnimation(d, list, newAnimation);
     }
@@ -617,42 +609,100 @@ function SdosSheetController() {
     var step = 0;
     var keys = [];
 
+    // "Next" button calls this function directly
     function stepAnimation(d){
 
         if(step == 0){
             // selecting step
-            selectingAnimation(d,keys);
+            selectingAnimation(d[0],keys);
             step = 1;
 
         }
         else{
             if(keys != []){
                 var node = keys.pop();
-                console.log("steo",d);
+                console.log("steo",d[0]);
                 changingKeysAnimation(node, []);
             }
         }
+    }
+
+
+    function selectingAnimationMultiple(d, visited_keys, multiples, step, callback) {
+          setTimeout(function () {
+            if (d.parent && d.operation != "selecting") {
+                d3.select("#delete_text").attr("value", "Selecting path from leaf to root");
+                d.operation = "selecting";
+                update(d);
+                visited_keys.push(d);
+                selectingAnimationMultiple(d.parent, visited_keys, multiples, step, callback);
+            }
+            else {
+                if(callback) {
+                    //add master key
+                    if(visitedMultiple.length == 0){
+                        visitedMultiple[0] = d;
+                    }
+
+
+                    visited_keys.reverse();
+                    visitedMultiple = visitedMultiple.concat(visited_keys);
+                    callback(multiples, step);
+                }
+                else{
+                   console.log("no callback");
+                }
+            }
+        }, 750);
+
+    }
+
+    var mulCont = 0;
+    var visitedMultiple = [];
+    var waitOne = 1;
+    function stepAnimationMultiple(d, doStep){
+
+        if(step == 0) {
+            selectingAnimationMultiple(d[mulCont], [], d, doStep,  stepAnimationMultiple);
+            mulCont = mulCont + 1;
+
+            if(mulCont == d.length)
+                step = 1;
+        }
+        else{
+            if(visitedMultiple != []) {
+                if(doStep){
+                    if(waitOne){
+                        waitOne = 0;
+                    }
+                    else {
+                        var node = visitedMultiple.shift();
+                        fadingAnimation(node, [], newAnimation);
+                    }
+                }
+                else {
+                     var master = visitedMultiple.shift();
+                    fadingAnimation(master, visitedMultiple, newAnimation);
+
+                }
+            }
+        }
+
     }
 
     function deleteAnimation(d) {
 
         // TODO Now "d" is an array of the objects to be delete
 
-        console.log(d);
-
         var auto = d3.select("#autoAnimation").property("checked");
-        if(!animation) {
-            if(auto) {
-                animation = 1;
-                selectingAnimation(d, [], changingKeysAnimation);
-            }
-            else{
-                // step by step
-                console.log("step");
-                stepAnimation(d);
 
+        if (!animation) {
+            if (auto) {
+                waitOne = 0;
+                stepAnimationMultiple(d, 0);
             }
         }
+
     }
 
     /*
@@ -838,7 +888,6 @@ function SdosSheetController() {
                 return d.target.id;
             });
 
-        console.log(link);
 
         // Enter any new links at the parent's previous position.
         link.enter().insert("path", "g")
@@ -925,7 +974,6 @@ function SdosSheetController() {
     }
 
     function siblingsUp(d) {
-    console.log("here:"+d);
         // take the new children
         var newChildren = d.parent.siblings_up.splice(d.parent.siblings_up.length - 5, 5);
 
