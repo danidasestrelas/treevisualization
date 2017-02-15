@@ -17,6 +17,9 @@ function SdosSheetController() {
     var icon_masterkey = "/angular/icons/d3/masterkey_test.svg";
     var icon_masterkey_pass = "/angular/icons/d3/masterkey_password.svg";
     var icon_masterkey_TPM = "/angular/icons/d3/masterkey_TPM.svg";
+    var icon_masterkey_new = "/angular/icons/d3/masterkey_test_new.svg";
+    var icon_masterkey_pass_new = "/angular/icons/d3/masterkey_password_new.svg";
+    var icon_masterkey_TPM_new = "/angular/icons/d3/masterkey_TPM_new.svg";
     var icon_plusfile = "/angular/icons/d3/pluskey_object.svg";
     var icon_pluskey = "/angular/icons/d3/pluskey.svg";
     var icon_object = "/angular/icons/d3/key_object.svg";
@@ -853,23 +856,29 @@ function SdosSheetController() {
                 }
                 if(d.type == "object" && d.parent.operation == "selected")
                     return icon_selectedfile;
-                return d.operation == "selected" ? icon_selectedkey :(d.operation == "new" ? icon_pluskey : (d.operation == "fade" ? "" : ( d.type == "key" ? (d._children ? icon_key_closed :icon_key) : (  d.type == "master" ?
+                return d.operation == "selected" ? icon_selectedkey :
+                    (d.operation == "new" ? ( d.type == "master" ? (
+                        d.key_type == "static" ? icon_masterkey_new :
+                            (d.key_type == "tpm" ? icon_masterkey_TPM_new : icon_masterkey_pass_new )
+                    ) : icon_pluskey) :
+                        (d.operation == "fade" ? "" : ( d.type == "key" ?
+                            (d._children ? icon_key_closed :icon_key) : (  d.type == "master" ?
                         (d.key_type == "static" ? icon_masterkey :
                             (d.key_type == "tpm" ? icon_masterkey_TPM : icon_masterkey_pass ) ) : ( d.type == "object" ? icon_file :
                     (d.type == "key_object" ? icon_object : (d.type == "up" || d.type == "down" ? icon_pluskey : icon_plusfile) ))))));
             })
             .attr("x",  function (d) {
-                return d.type == "master" && d.operation == null ? "-30px" : "-19px"
+                return d.type == "master" ? "-30px" : "-19px"
             })
             .attr("y", function (d) {
-                return d.type == "master" && d.operation == null ? "-120px" : "-24px"
+                return d.type == "master" ? "-120px" : "-24px"
             })
             .attr("width", function (d) {
-                return d.type == "master" && d.operation == null ? "130px" : "37px"
+                return d.type == "master" ? "130px" : "37px"
 
             })
             .attr("height", function (d) {
-                return d.type == "master" && d.operation == null ? "150px" : "37px"
+                return d.type == "master" ? "150px" : "37px"
             });
 
 
