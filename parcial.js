@@ -1125,7 +1125,7 @@ function SdosSheetController() {
                          * */
                         children[i] = {
                             name: objects[i].slot,
-                            "_children": [{name: objects[i].objName, "type": "object"}],
+                            "children": [{name: objects[i].objName, "type": "object"}],
                             "type": "key_object"
                         };
                     }
@@ -1135,7 +1135,7 @@ function SdosSheetController() {
                          * */
                         siblings[i - 5] = {
                             name: objects[i].slot,
-                            "_children": [{name: objects[i].objName, "type": "object"}],
+                            "children": [{name: objects[i].objName, "type": "object"}],
                             "type": "key_object"
                         };
                     }
@@ -1149,7 +1149,7 @@ function SdosSheetController() {
                     for (i = 0; i < objects.length; i++) {
                         children[i] = {
                             name: objects[i].slot,
-                            "_children": [{name: objects[i].objName, "type": "object"}],
+                            "children": [{name: objects[i].objName, "type": "object"}],
                             "type": "key_object"
                         };
                     }
