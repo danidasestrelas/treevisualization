@@ -524,6 +524,11 @@ function SdosSheetController() {
                     changeChildren(d);
                 }
             }
+            /*else{
+                if(d._children != null){
+                    changeChildren(d);
+                }
+            }*/
         });
     }
     /*
