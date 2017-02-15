@@ -14,7 +14,9 @@ function SdosSheetController() {
     var icon_file = "/angular/icons/d3/plusfile.svg";
     var icon_key = "/angular/icons/d3/key.svg";
     var icon_key_closed = "/angular/icons/d3/key_closed.svg";
-    var icon_masterkey = "/angular/icons/d3/masterkey.svg";
+    var icon_masterkey = "/angular/icons/d3/masterkey_test.svg";
+    var icon_masterkey_pass = "/angular/icons/d3/masterkey_password.svg";
+    var icon_masterkey_TPM = "/angular/icons/d3/masterkey_TPM.svg";
     var icon_plusfile = "/angular/icons/d3/pluskey_object.svg";
     var icon_pluskey = "/angular/icons/d3/pluskey.svg";
     var icon_object = "/angular/icons/d3/key_object.svg";
@@ -29,6 +31,8 @@ function SdosSheetController() {
     var text;
 
     var animation = 0;
+
+    var cascadeData;
 
 
 
@@ -103,6 +107,7 @@ function SdosSheetController() {
     }
 
     function renderTree(data) {
+        cascadeData = data;
         dataset = jsonToFlare(data);
         root = dataset[0];
         root.x0 = height / 2;
@@ -130,7 +135,7 @@ function SdosSheetController() {
         update(root);
 
 
-        if(data.sdos_batch_delete_log != null){
+        if(data.sdos_batch_delete_log.length){
             loadNode(root, data.sdos_batch_delete_log, data);
         }
 
@@ -692,8 +697,6 @@ function SdosSheetController() {
 
     function deleteAnimation(d) {
 
-        // TODO Now "d" is an array of the objects to be delete
-
         var auto = d3.select("#autoAnimation").property("checked");
 
         if (!animation) {
@@ -748,6 +751,8 @@ function SdosSheetController() {
                     return clickDown(d);
                 else if (d.type == "up" || d.type == "object_up")
                     return clickUp(d);
+                else if (d.type == "object")
+                    return clickOpenObject(d);
                 else return click(d)
             });
 
@@ -793,13 +798,26 @@ function SdosSheetController() {
 
         nodeEnter.append("svg:image")
             .attr("xlink:href", function (d) {
-                return d.type == "key" ? (d._children ? icon_key_closed :icon_key) : ( d.type == "master" ? icon_masterkey : ( d.type == "object" ? icon_file :
+                return d.type == "key" ? (d._children ? icon_key_closed :icon_key) : (
+                    d.type == "master" ?
+                        (d.key_type == "static" ? icon_masterkey :
+                            (d.key_type == "tpm" ? icon_masterkey_TPM : icon_masterkey_pass ) )
+                        : ( d.type == "object" ? icon_file :
                     (d.type == "key_object" ? icon_object : (d.type == "up" || d.type == "down" ? icon_pluskey : icon_plusfile) )));
             })
-            .attr("x", "-19px")
-            .attr("y", "-24px")
-            .attr("width", "37px")
-            .attr("height", "37px");
+            .attr("x",  function (d) {
+                return d.type == "master" && d.operation == null ? "-30px" : "-19px"
+            })
+            .attr("y", function (d) {
+                return d.type == "master" && d.operation == null ? "-120px" : "-24px"
+            })
+            .attr("width", function (d) {
+                return d.type == "master" && d.operation == null ? "130px" : "37px"
+
+            })
+            .attr("height", function (d) {
+                return d.type == "master" && d.operation == null ? "150px" : "37px"
+            });
 
 
 
@@ -830,8 +848,23 @@ function SdosSheetController() {
                 }
                 if(d.type == "object" && d.parent.operation == "selected")
                     return icon_selectedfile;
-                return d.operation == "selected" ? icon_selectedkey :(d.operation == "new" ? icon_pluskey : (d.operation == "fade" ? "" : ( d.type == "key" ? (d._children ? icon_key_closed :icon_key) : ( d.type == "master" ? icon_masterkey : ( d.type == "object" ? icon_file :
+                return d.operation == "selected" ? icon_selectedkey :(d.operation == "new" ? icon_pluskey : (d.operation == "fade" ? "" : ( d.type == "key" ? (d._children ? icon_key_closed :icon_key) : (  d.type == "master" ?
+                        (d.key_type == "static" ? icon_masterkey :
+                            (d.key_type == "tpm" ? icon_masterkey_TPM : icon_masterkey_pass ) ) : ( d.type == "object" ? icon_file :
                     (d.type == "key_object" ? icon_object : (d.type == "up" || d.type == "down" ? icon_pluskey : icon_plusfile) ))))));
+            })
+            .attr("x",  function (d) {
+                return d.type == "master" && d.operation == null ? "-30px" : "-19px"
+            })
+            .attr("y", function (d) {
+                return d.type == "master" && d.operation == null ? "-120px" : "-24px"
+            })
+            .attr("width", function (d) {
+                return d.type == "master" && d.operation == null ? "130px" : "37px"
+
+            })
+            .attr("height", function (d) {
+                return d.type == "master" && d.operation == null ? "150px" : "37px"
             });
 
 
@@ -852,7 +885,6 @@ function SdosSheetController() {
                 //return d._children ? (d.type == "key" ? "lightsteelblue" : "#c3c3c3" ) : "#fff"
             })
             .style("fill-opacity", 1)
-            //TODO IDEA 1
             .style("stroke", function (d) {
                 return "none";
                 //return d.operation == "selected" ? "#DA6B03" : ( d.operation == "selecting"? "#B83737" :"steelblue")
@@ -1019,6 +1051,12 @@ function SdosSheetController() {
         changeChildren(d);
         update(d);
     }
+
+    function clickOpenObject(d) {
+        var link = "/swift/containers/" + cascadeData.container.name + "/objects/" + d.name + "?show_inline=true";
+        window.open(link, "_blank");
+
+    }
     /*
     * Ends navigation and click events functions
     * */
@@ -1034,12 +1072,14 @@ function SdosSheetController() {
          * */
         var name = 0; //pidFop(data.partitionSize, 0);  it is always 0
         var children = getChildren(name, 1, data);
+        console.log(data);
         return [{
             "name": name,
             "children": children[0],
             "siblings_up": null,
             "siblings_down": children[1],
-            "type": "master"
+            "type":"master",
+            "key_type": data.masterKeySource.type.toString()
         }];
     }
 
