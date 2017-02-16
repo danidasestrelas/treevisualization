@@ -6,10 +6,11 @@ var svg;
 var root;
 var mappging = [];
  var selected_object = null;
+var dataA;
 
 function SdosSheetController() {
 
-    var jsonFile = "partree.json";
+    var jsonFile = "cascadeData.json";
 
     var icon_file = "/angular/icons/d3/plusfile.svg";
     var icon_key = "/angular/icons/d3/key.svg";
@@ -72,7 +73,7 @@ function SdosSheetController() {
         } else {
             console.log(data);
 
-            dataP = data;
+            dataA = data;
             renderTree(data);
 
         }
@@ -363,7 +364,7 @@ function SdosSheetController() {
     function multipleLeafsPath(source,list, ps, path) {
         var multiplePath = [];
         var objects = [];
-        var open;
+        var open = [];
 
         //list = ["4369|0", "4369|2", "4369|9", "4373|66"];
 
@@ -378,38 +379,42 @@ function SdosSheetController() {
         });
 
         //select all nodes
-        open = rightChildren(source, multiplePath, objects);
+        rightChildren(source, multiplePath, objects, open);
 
+        console.log(open);
 
         if(objects.length == 1){ //Search one just object
+            open.forEach(function (op) {
+                console.log(op);
+                var found = 0;
+                var down = 1;
+                while(!found) {
 
-            var found = 0;
-            var down = 1;
-            while(!found) {
-                //look if the object is in children
-                open[1].children.forEach(function (d) {
-                    if (d.name == open[0].name) {
-                        found = 1;
-                    }
-
-                });
-
-                if(!found){
-                    //go siblings down
-                    if (down) {
-                        siblingsDown(open[1].children[open[1].children.length - 1]);
-                        if (open[1].siblings_down.length == 0) {
-                            down = 0;
+                    //look if the object is in children
+                    op[1].children.forEach(function (d) {
+                        if (d.name == op[0].name) {
+                            found = 1;
                         }
-                    }
-                    else {
-                        siblingsUp(open[1].children[0]);
-                        if (open[1].siblings_up.length == 0) {
-                            down = 1;
+
+                    });
+
+                    if(!found){
+                        //go siblings down
+                        if (down) {
+                            siblingsDown(op[1].children[op[1].children.length - 1], op[1]);
+                            if (op[1].siblings_down.length == 0) {
+                                down = 0;
+                            }
+                        }
+                        else {
+                            siblingsUp(op[1].children[0], op[1]);
+                            if (op[1].siblings_up.length == 0) {
+                                down = 1;
+                            }
                         }
                     }
                 }
-            }
+            });
         }
 
 
@@ -434,11 +439,10 @@ function SdosSheetController() {
         }
     }
 
-    function rightChildren(source, openNodes, object) {
+    function rightChildren(source, openNodes, object, open) {
         /* Go through all children
          * */
         var next = null;
-        var open = null;
 
         /* Testes if the node is not closed, then open it
          * */
@@ -476,8 +480,8 @@ function SdosSheetController() {
                 if (openNodes.indexOf(d.name) > -1 && (d.type == "key")) {
                     d.operation = "selected";
                     next = d;
-
-                    open = rightChildren(next, openNodes, object);
+                    open.push([d, source]);
+                    rightChildren(next, openNodes, object, open);
 
                 }
                 else if (d.type == "key_object") {
@@ -489,7 +493,7 @@ function SdosSheetController() {
                         d.operation = "selected";
                         changeChildren(d);
 
-                        open = [d, source];
+                        open.push([d, source]);
                     }
                     else{
                          d.operation = "none";
@@ -978,74 +982,74 @@ function SdosSheetController() {
     *
     * */
     function clickDown(d) {
-        siblingsDown(d);
+        siblingsDown(d, d.parent);
         update(d);
     }
 
-    function siblingsDown(d) {
+    function siblingsDown(d, parent) {
         // add the list up object
-        if (d.parent.siblings_up.length == 0) {
+        if (parent.siblings_up.length == 0) {
             if (d.type == "object_down")
-                d.parent.children.splice(0, 0, {"name": "↑", "children": null, "type": "object_up"});
+                parent.children.splice(0, 0, {"name": "↑", "children": null, "type": "object_up"});
             else
-                d.parent.children.splice(0, 0, {"name": "↑", "children": null, "type": "up"});
+                parent.children.splice(0, 0, {"name": "↑", "children": null, "type": "up"});
         }
         /* Remove the last 5 children from the parent
          * */
         var newSiblings;
 
-        if (d.parent.siblings_up.lenght == 0)
-            newSiblings = d.parent.children.splice(0, d.parent.children.length - 1);
+        if (parent.siblings_up.lenght == 0)
+            newSiblings = parent.children.splice(0, parent.children.length - 1);
         else
-            newSiblings = d.parent.children.splice(-6, 5);
+            newSiblings = parent.children.splice(-6, 5);
         // Take new children from the siblings_down
-        var newChildren = d.parent.siblings_down.splice(0, 5);
+        var newChildren = parent.siblings_down.splice(0, 5);
         newChildren.forEach(function (e) {
-            d.parent.children.splice(-1, 0, e);
+            parent.children.splice(-1, 0, e);
         });
 
         // put the old children in siblings_up
-        d.parent.siblings_up = d.parent.siblings_up.concat(newSiblings);
+        parent.siblings_up = parent.siblings_up.concat(newSiblings);
 
         // if comes to the end of the list siblings_down, remove the list down objetc
-        if (d.parent.siblings_down.length == 0)
-            d.parent.children.splice(-1, 1);
+        if (parent.siblings_down.length == 0)
+            parent.children.splice(-1, 1);
 
         //update(d);
     }
 
     function clickUp(d) {
-        siblingsUp(d);
+        siblingsUp(d, d.parent);
         update(d);
     }
 
-    function siblingsUp(d) {
+    function siblingsUp(d, parent) {
         // take the new children
-        var newChildren = d.parent.siblings_up.splice(d.parent.siblings_up.length - 5, 5);
+        var newChildren = parent.siblings_up.splice(parent.siblings_up.length - 5, 5);
 
         var newSiblings;
         // remove children
-        if (d.parent.siblings_down.length == 0) {
-            newSiblings = d.parent.children.splice(1, d.parent.children.length - 1);
+        if (parent.siblings_down.length == 0) {
+            newSiblings = parent.children.splice(1, parent.children.length - 1);
 
             if (d.type == "object_up")
-                d.parent.children.splice(1, 0, {"name": "↓", "children": null, "type": "object_down"});
+                parent.children.splice(1, 0, {"name": "↓", "children": null, "type": "object_down"});
             else
-                d.parent.children.splice(1, 0, {"name": "↓", "children": null, "type": "down"});
+                parent.children.splice(1, 0, {"name": "↓", "children": null, "type": "down"});
         }
         else {
-            newSiblings = d.parent.children.splice(-6, 5);
+            newSiblings = parent.children.splice(-6, 5);
         }
 
         newChildren.forEach(function (e) {
-            d.parent.children.splice(-1, 0, e);
+            parent.children.splice(-1, 0, e);
         });
 
 
-        d.parent.siblings_down = newSiblings.concat(d.parent.siblings_down);
+        parent.siblings_down = newSiblings.concat(d.parent.siblings_down);
 
-        if (d.parent.siblings_up.length == 0)
-            d.parent.children.splice(0, 1);
+        if (parent.siblings_up.length == 0)
+            parent.children.splice(0, 1);
 
         //update(d);
     }
