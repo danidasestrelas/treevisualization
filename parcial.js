@@ -8,7 +8,7 @@ var mappging = [];
  var selected_object = null;
 var dataA;
 
-function SdosSheetController() {
+function SdosSheetController($rootScope, $state, $scope, $mdDialog, $http) {
 
     var jsonFile = "cascadeData.json";
 
@@ -38,7 +38,15 @@ function SdosSheetController() {
 
     var cascadeData;
 
+     // this is how the UI knows which explain-text to highlight
+    $scope.current_animation_step = 0;
 
+    $scope.hide = function () {
+        $mdDialog.hide();
+    };
+    $scope.cancel = function () {
+        $mdDialog.cancel();
+    };
 
 
     var margin = {top: 20, right: 120, bottom: 20, left: 120},
@@ -383,7 +391,7 @@ function SdosSheetController() {
 
         console.log(open);
 
-        if(objects.length == 1){ //Search one just object
+       // if(objects.length == 1){ //Search one just object
             open.forEach(function (op) {
                 console.log(op);
                 var found = 0;
@@ -415,7 +423,7 @@ function SdosSheetController() {
                     }
                 }
             });
-        }
+        //}
 
 
     }
@@ -552,6 +560,18 @@ function SdosSheetController() {
     function newAnimation(d, visited_keys, callback) {
         setTimeout(function () {
             d3.select("#delete_text").attr("value", "Inputing new key");
+
+            // New key
+            if(d.type == "master"){
+                $scope.current_animation_step = 7;
+                $scope.$apply();
+            }
+            else { // key_object and object do not call newAnimation
+                $scope.current_animation_step = 3;
+                $scope.$apply();
+            }
+
+
             d.operation = "new";
             update(d);
             if(callback) {
@@ -566,6 +586,26 @@ function SdosSheetController() {
     function fadingAnimation(d, visited_keys, callback) {
         setTimeout(function () {
             d3.select("#delete_text").attr("value", "Deleting old key");
+
+            // Remove OLD key
+            if(d.type == "master"){
+                $scope.current_animation_step = 4;
+                $scope.$apply();
+            }
+            else if(d.type == "key") {
+                $scope.current_animation_step = 2;
+                $scope.$apply();
+            }
+            else if(d.type == "key_object") {
+                $scope.current_animation_step = 5;
+                $scope.$apply();
+            }
+            else{ //remove object
+                $scope.current_animation_step = 6;
+                $scope.$apply();
+            }
+
+
             d.operation = "fade";
             update(d);
             if(d.type == "object"){
@@ -604,6 +644,8 @@ function SdosSheetController() {
         setTimeout(function () {
             if (d.parent) {
                 d3.select("#delete_text").attr("value", "Selecting path from leaf to root");
+                $scope.current_animation_step = 1;
+                $scope.$apply();
                 d.operation = "selecting";
                 update(d);
                 visited_keys.push(d);
@@ -649,6 +691,8 @@ function SdosSheetController() {
           setTimeout(function () {
             if (d.parent && d.operation != "selecting") {
                 d3.select("#delete_text").attr("value", "Selecting path from leaf to root");
+                $scope.current_animation_step = 1;
+                $scope.$apply();
                 d.operation = "selecting";
                 update(d);
                 visited_keys.push(d);
