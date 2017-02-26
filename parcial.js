@@ -39,14 +39,15 @@ function SdosSheetController($rootScope, $state, $scope, $mdDialog, $http) {
     var cascadeData;
 
      // this is how the UI knows which explain-text to highlight
-    $scope.current_animation_step = 0;
-
+    //$scope.current_animation_step = 0;
+    /*
     $scope.hide = function () {
         $mdDialog.hide();
     };
     $scope.cancel = function () {
         $mdDialog.cancel();
     };
+    */
 
 
     var margin = {top: 20, right: 120, bottom: 20, left: 120},
@@ -563,12 +564,12 @@ function SdosSheetController($rootScope, $state, $scope, $mdDialog, $http) {
 
             // New key
             if(d.type == "master"){
-                $scope.current_animation_step = 7;
-                $scope.$apply();
+                //$scope.current_animation_step = 7;
+                //$scope.$apply();
             }
             else { // key_object and object do not call newAnimation
-                $scope.current_animation_step = 3;
-                $scope.$apply();
+                //$scope.current_animation_step = 3;
+                //$scope.$apply();
             }
 
 
@@ -589,20 +590,20 @@ function SdosSheetController($rootScope, $state, $scope, $mdDialog, $http) {
 
             // Remove OLD key
             if(d.type == "master"){
-                $scope.current_animation_step = 4;
-                $scope.$apply();
+                //$scope.current_animation_step = 4;
+                //$scope.$apply();
             }
             else if(d.type == "key") {
-                $scope.current_animation_step = 2;
-                $scope.$apply();
+                //$scope.current_animation_step = 2;
+                //$scope.$apply();
             }
             else if(d.type == "key_object") {
-                $scope.current_animation_step = 5;
-                $scope.$apply();
+                //$scope.current_animation_step = 5;
+                //$scope.$apply();
             }
             else{ //remove object
-                $scope.current_animation_step = 6;
-                $scope.$apply();
+                //$scope.current_animation_step = 6;
+                //$scope.$apply();
             }
 
 
@@ -644,8 +645,8 @@ function SdosSheetController($rootScope, $state, $scope, $mdDialog, $http) {
         setTimeout(function () {
             if (d.parent) {
                 d3.select("#delete_text").attr("value", "Selecting path from leaf to root");
-                $scope.current_animation_step = 1;
-                $scope.$apply();
+                //$scope.current_animation_step = 1;
+                //$scope.$apply();
                 d.operation = "selecting";
                 update(d);
                 visited_keys.push(d);
@@ -691,8 +692,8 @@ function SdosSheetController($rootScope, $state, $scope, $mdDialog, $http) {
           setTimeout(function () {
             if (d.parent && d.operation != "selecting") {
                 d3.select("#delete_text").attr("value", "Selecting path from leaf to root");
-                $scope.current_animation_step = 1;
-                $scope.$apply();
+                //$scope.current_animation_step = 1;
+                //$scope.$apply();
                 d.operation = "selecting";
                 update(d);
                 visited_keys.push(d);

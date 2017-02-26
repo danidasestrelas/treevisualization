@@ -83856,7 +83856,7 @@
     ]
   },
   "sdos_batch_delete_log": [
-    "1053", "11", "8948", "1158"
+    "1053"
   ],
   "container": {
     "name": "large",
